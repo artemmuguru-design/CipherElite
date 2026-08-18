@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ChugurHub</title>
+    
+    <!-- PWA мета-теги -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="ChugurHub">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0d1117">
+    
     <style>
         * {
             margin: 0;
@@ -19,6 +27,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .header {
@@ -28,12 +37,14 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-shrink: 0;
         }
 
         .header h1 {
             font-size: 20px;
             flex: 1;
             color: #58a6ff;
+            font-weight: bold;
         }
 
         button {
@@ -45,6 +56,7 @@
             cursor: pointer;
             font-size: 14px;
             transition: all 0.2s;
+            touch-action: manipulation;
         }
 
         button:active {
@@ -65,10 +77,16 @@
             color: #000;
         }
 
+        .btn-pages {
+            background: #a371f7;
+            color: white;
+        }
+
         .tabs {
             display: flex;
             background: #161b22;
             border-bottom: 1px solid #30363d;
+            flex-shrink: 0;
         }
 
         .tab {
@@ -80,6 +98,7 @@
             color: #8b949e;
             border-bottom: 2px solid transparent;
             user-select: none;
+            touch-action: manipulation;
         }
 
         .tab.active {
@@ -91,6 +110,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 16px;
+            -webkit-overflow-scrolling: touch;
         }
 
         .repo-card {
@@ -117,6 +137,14 @@
         .repo-card p {
             color: #8b949e;
             font-size: 14px;
+            margin: 3px 0;
+        }
+
+        .repo-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
         }
 
         .empty-state {
@@ -192,10 +220,12 @@
             align-items: center;
             gap: 10px;
             font-size: 14px;
+            flex-wrap: wrap;
         }
 
         .file-item .file-name {
             flex: 1;
+            min-width: 100px;
         }
 
         iframe {
@@ -223,6 +253,24 @@
         .toast.show {
             display: block;
             animation: fadeIn 0.3s;
+        }
+
+        .site-url {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #58a6ff;
+            margin: 5px 0;
+            word-break: break-all;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .site-url span {
+            flex: 1;
         }
 
         @keyframes fadeIn {
@@ -283,8 +331,7 @@
             }
             
             if (repos.length === 0) {
-                // Создаём демо-репозиторий
-                repos.push({
+                const demoRepo = {
                     id: Date.now(),
                     name: 'demo-site',
                     description: 'Демонстрационный сайт',
@@ -295,7 +342,8 @@
                             content: '<!DOCTYPE html>\n<html>\n<head>\n    <title>Мой сайт</title>\n    <style>\n        body {\n            font-family: Arial;\n            text-align: center;\n            padding: 50px;\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n            color: white;\n        }\n        h1 { font-size: 3em; }\n    </style>\n</head>\n<body>\n    <h1>🚀 ChugurHub работает!</h1>\n    <p>Это демонстрационная страница</p>\n</body>\n</html>'
                         }
                     ]
-                });
+                };
+                repos.push(demoRepo);
                 saveData();
             }
         }
@@ -327,9 +375,17 @@
             let html = '';
             repos.forEach(repo => {
                 const fileCount = repo.files ? repo.files.length : 0;
-                html += '<div class="repo-card" onclick="openRepo(' + repo.id + ')">';
+                const hasIndex = repo.files && repo.files.some(f => f.name === 'index.html');
+                
+                html += '<div class="repo-card">';
                 html += '<h3>📁 ' + repo.name + '</h3>';
                 html += '<p>' + (repo.description || 'Нет описания') + ' • ' + fileCount + ' файл(ов)</p>';
+                html += '<div class="repo-actions">';
+                html += '<button onclick="openRepo(' + repo.id + ')">Открыть</button>';
+                if (hasIndex) {
+                    html += '<button class="btn-pages" onclick="openSiteInNewTab(' + repo.id + ')">🌐 Открыть сайт</button>';
+                }
+                html += '</div>';
                 html += '</div>';
             });
             
@@ -348,15 +404,38 @@
                 return;
             }
 
-            let html = '';
+            let html = '<p style="margin-bottom: 20px; color: #8b949e;">Ваши сайты (открываются в новой вкладке):</p>';
             pagesRepos.forEach(repo => {
-                html += '<div class="repo-card" onclick="openPage(' + repo.id + ')">';
+                html += '<div class="repo-card">';
                 html += '<h3>🌐 ' + repo.name + '</h3>';
-                html += '<p>Открыть страницу</p>';
+                html += '<div class="site-url">';
+                html += '<span>chugurhub.' + repo.name + '.app</span>';
+                html += '</div>';
+                html += '<div class="repo-actions">';
+                html += '<button class="btn-preview" onclick="openSiteInNewTab(' + repo.id + ')">↗ Открыть в новой вкладке</button>';
+                html += '</div>';
                 html += '</div>';
             });
             
             content.innerHTML = html;
+        }
+
+        function openSiteInNewTab(id) {
+            const repo = repos.find(r => r.id === id);
+            if (!repo) return;
+            
+            const indexFile = repo.files.find(f => f.name === 'index.html');
+            if (!indexFile) return;
+            
+            // Создаём Blob URL и открываем в новой вкладке
+            const blob = new Blob([indexFile.content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            
+            // Открываем в новой вкладке
+            const newWindow = window.open(url, '_blank');
+            
+            // Показываем toast с "адресом" сайта
+            showToast('Сайт открыт: chugurhub.' + repo.name + '.app');
         }
 
         function showCreateRepo() {
@@ -394,9 +473,14 @@
             
             const content = document.getElementById('content');
             
-            let html = '<div style="margin-bottom: 15px;">';
+            let html = '<div style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">';
             html += '<button class="btn-secondary" onclick="showReposList()">← Назад</button> ';
             html += '<button onclick="showCreateFile()">+ Файл</button>';
+            
+            const hasIndex = currentRepo.files.some(f => f.name === 'index.html');
+            if (hasIndex) {
+                html += '<button class="btn-pages" onclick="openSiteInNewTab(' + currentRepo.id + ')">🌐 Сайт</button>';
+            }
             html += '</div>';
             html += '<h2 style="margin-bottom: 15px;">📁 ' + currentRepo.name + '</h2>';
             
@@ -411,7 +495,7 @@
                     html += '</div>';
                 });
             } else {
-                html += '<p style="color: #8b949e; text-align: center; padding: 20px;">Нет файлов</p>';
+                html += '<p style="color: #8b949e; text-align: center; padding: 20px;">Нет файлов. Создайте файл index.html чтобы опубликовать сайт!</p>';
             }
             
             content.innerHTML = html;
@@ -433,7 +517,7 @@
             const file = {
                 id: Date.now(),
                 name: name,
-                content: ''
+                content: name.endsWith('.html') ? '<!DOCTYPE html>\n<html>\n<head>\n    <title>Новая страница</title>\n</head>\n<body>\n    <h1>Привет, ChugurHub!</h1>\n</body>\n</html>' : ''
             };
 
             currentRepo.files.push(file);
@@ -449,11 +533,12 @@
             
             const content = document.getElementById('content');
             
-            let html = '<div style="margin-bottom: 15px;">';
+            let html = '<div style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">';
             html += '<button class="btn-secondary" onclick="openRepo(' + currentRepo.id + ')">← Назад</button> ';
             html += '<button onclick="saveFile()">💾 Сохранить</button> ';
             if (currentFile.name.endsWith('.html')) {
                 html += '<button class="btn-preview" onclick="previewFile()">👁 Предпросмотр</button>';
+                html += '<button class="btn-pages" onclick="openSiteInNewTab(' + currentRepo.id + ')">🌐 Сайт</button>';
             }
             html += '</div>';
             html += '<h3 style="margin-bottom: 10px;">' + getFileIcon(currentFile.name) + ' ' + currentFile.name + '</h3>';
@@ -481,19 +566,6 @@
                 content.innerHTML = '<button class="btn-secondary" onclick="openFile(' + currentFile.id + ')">← Назад</button><br><br>';
                 content.innerHTML += '<iframe srcdoc="' + escapeHtml(currentFile.content) + '"></iframe>';
             }
-        }
-
-        function openPage(id) {
-            const repo = repos.find(r => r.id === id);
-            if (!repo) return;
-            
-            const indexFile = repo.files.find(f => f.name === 'index.html');
-            if (!indexFile) return;
-            
-            const content = document.getElementById('content');
-            content.innerHTML = '<button class="btn-secondary" onclick="showPagesList()">← Назад</button><br><br>';
-            content.innerHTML += '<h2>🌐 ' + repo.name + '</h2><br>';
-            content.innerHTML += '<iframe srcdoc="' + escapeHtml(indexFile.content) + '"></iframe>';
         }
 
         function deleteFile(id) {
@@ -551,4 +623,4 @@
         showReposList();
     </script>
 </body>
-        </html>
+                                                                                                                       </html>
