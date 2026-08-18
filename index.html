@@ -3,20 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ChugurHub - мобильный GitHub</title>
+    <title>ChugurHub</title>
     <style>
-        :root {
-            --bg: #0d1117;
-            --card: #161b22;
-            --border: #30363d;
-            --text: #e6edf3;
-            --accent: #58a6ff;
-            --green: #238636;
-            --red: #da3633;
-            --muted: #8b949e;
-            --purple: #a371f7;
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -25,90 +13,62 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            background: #0d1117;
+            color: #e6edf3;
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Шапка */
         .header {
-            background: var(--card);
-            border-bottom: 1px solid var(--border);
-            padding: 12px 16px;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 15px;
             display: flex;
             align-items: center;
             gap: 10px;
-            flex-shrink: 0;
         }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .header h1 {
+            font-size: 20px;
             flex: 1;
+            color: #58a6ff;
         }
 
-        .logo-icon {
-            font-size: 24px;
-        }
-
-        .logo h1 {
-            font-size: 18px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #58a6ff, #a371f7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .btn {
-            background: var(--card);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 8px 14px;
+        button {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 10px 16px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
+            font-size: 14px;
             transition: all 0.2s;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 5px;
         }
 
-        .btn:active {
+        button:active {
             transform: scale(0.95);
         }
 
-        .btn-primary {
-            background: var(--green);
-            border-color: var(--green);
-            color: white;
-        }
-
-        .btn-accent {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: #000;
+        .btn-secondary {
+            background: #21262d;
+            border: 1px solid #30363d;
         }
 
         .btn-danger {
-            background: transparent;
-            border-color: var(--red);
-            color: var(--red);
+            background: #da3633;
         }
 
-        /* Вкладки */
+        .btn-preview {
+            background: #58a6ff;
+            color: #000;
+        }
+
         .tabs {
             display: flex;
-            background: var(--card);
-            border-bottom: 1px solid var(--border);
-            flex-shrink: 0;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
         }
 
         .tab {
@@ -116,78 +76,67 @@
             padding: 12px;
             text-align: center;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--muted);
+            font-size: 15px;
+            color: #8b949e;
             border-bottom: 2px solid transparent;
-            transition: all 0.2s;
             user-select: none;
         }
 
         .tab.active {
-            color: var(--text);
-            border-bottom-color: var(--accent);
+            color: #e6edf3;
+            border-bottom-color: #58a6ff;
         }
 
-        /* Контент */
         .content {
             flex: 1;
             overflow-y: auto;
             padding: 16px;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        /* Список репозиториев */
-        .repo-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
         }
 
         .repo-card {
-            background: var(--card);
-            border: 1px solid var(--border);
+            background: #161b22;
+            border: 1px solid #30363d;
             border-radius: 8px;
-            padding: 14px;
+            padding: 16px;
+            margin-bottom: 10px;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .repo-card:active {
-            transform: scale(0.97);
-            border-color: var(--accent);
+            border-color: #58a6ff;
+            transform: scale(0.98);
         }
 
         .repo-card h3 {
-            font-size: 16px;
-            margin-bottom: 6px;
-            color: var(--accent);
+            color: #58a6ff;
+            margin-bottom: 5px;
+            font-size: 18px;
         }
 
         .repo-card p {
-            font-size: 13px;
-            color: var(--muted);
+            color: #8b949e;
+            font-size: 14px;
         }
 
         .empty-state {
             text-align: center;
-            padding: 40px 20px;
-            color: var(--muted);
+            padding: 50px 20px;
+            color: #8b949e;
         }
 
         .empty-state .icon {
-            font-size: 48px;
-            margin-bottom: 16px;
+            font-size: 60px;
+            margin-bottom: 20px;
         }
 
-        /* Модальные окна */
-        .modal-overlay {
+        .modal {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0,0,0,0.8);
             display: none;
             justify-content: center;
             align-items: center;
@@ -195,249 +144,136 @@
             padding: 20px;
         }
 
-        .modal-overlay.show {
+        .modal.show {
             display: flex;
         }
 
-        .modal {
-            background: var(--card);
-            border: 1px solid var(--border);
+        .modal-content {
+            background: #161b22;
+            border: 1px solid #30363d;
             border-radius: 12px;
+            padding: 20px;
             width: 100%;
             max-width: 400px;
-            max-height: 80vh;
-            overflow-y: auto;
-            padding: 20px;
         }
 
-        .modal h2 {
+        .modal-content h2 {
+            margin-bottom: 15px;
             font-size: 18px;
-            margin-bottom: 16px;
         }
 
-        .input {
+        input, textarea {
             width: 100%;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 10px 12px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: #e6edf3;
+            padding: 12px;
             border-radius: 6px;
             font-size: 14px;
             margin-bottom: 12px;
             font-family: inherit;
         }
 
-        .input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        textarea.input {
-            resize: vertical;
-            min-height: 100px;
+        textarea {
+            min-height: 300px;
             font-family: 'Courier New', monospace;
             font-size: 13px;
             line-height: 1.5;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            margin-top: 8px;
-            flex-wrap: wrap;
-        }
-
-        /* Редактор репозитория */
-        .editor-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-
-        .editor-header h2 {
-            flex: 1;
-            font-size: 18px;
-            min-width: 100px;
-        }
-
-        .code-editor {
-            width: 100%;
-            min-height: 200px;
-            background: #0a0e14;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: #c9d1d9;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            padding: 12px;
-            margin-bottom: 12px;
             resize: vertical;
-            line-height: 1.5;
-            tab-size: 4;
-        }
-
-        .code-editor:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .file-list {
-            margin: 10px 0;
         }
 
         .file-item {
-            background: var(--bg);
-            border: 1px solid var(--border);
+            background: #0d1117;
+            border: 1px solid #30363d;
             border-radius: 6px;
-            padding: 10px;
+            padding: 12px;
             margin-bottom: 8px;
-            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            transition: all 0.2s;
-            flex-wrap: wrap;
-        }
-
-        .file-item:active {
-            border-color: var(--accent);
-        }
-
-        .file-item .file-icon {
-            font-size: 16px;
+            gap: 10px;
+            font-size: 14px;
         }
 
         .file-item .file-name {
             flex: 1;
-            min-width: 80px;
         }
 
-        /* Preview */
-        .preview-frame {
+        iframe {
             width: 100%;
-            height: 100%;
-            min-height: 400px;
+            height: 500px;
             background: white;
             border: none;
             border-radius: 8px;
         }
 
-        .preview-controls {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-
-        /* Toast уведомления */
         .toast {
             position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--card);
-            border: 1px solid var(--border);
-            padding: 10px 20px;
+            background: #238636;
+            color: white;
+            padding: 12px 24px;
             border-radius: 20px;
-            font-size: 13px;
+            font-size: 14px;
             display: none;
             z-index: 200;
-            white-space: nowrap;
-            max-width: 90%;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .toast.show {
             display: block;
-            animation: toastIn 0.3s;
+            animation: fadeIn 0.3s;
         }
 
-        @keyframes toastIn {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
-        }
-
-        /* Кнопка удаления файла */
-        .delete-file-btn {
-            background: transparent;
-            border: none;
-            color: var(--red);
-            cursor: pointer;
-            font-size: 16px;
-            padding: 4px;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
     </style>
 </head>
 <body>
-    <!-- Шапка -->
     <div class="header">
-        <div class="logo">
-            <span class="logo-icon">📦</span>
-            <h1>ChugurHub</h1>
-        </div>
-        <button class="btn btn-primary" onclick="showCreateRepoModal()">+ Новый</button>
+        <h1>📦 ChugurHub</h1>
+        <button onclick="showCreateRepo()">+ Новый</button>
     </div>
 
-    <!-- Вкладки -->
     <div class="tabs">
-        <div class="tab active" onclick="switchTab('repos')">📁 Репозитории</div>
-        <div class="tab" onclick="switchTab('pages')">🌐 Pages</div>
+        <div class="tab active" onclick="switchTab('repos', this)">📁 Репозитории</div>
+        <div class="tab" onclick="switchTab('pages', this)">🌐 Pages</div>
     </div>
 
-    <!-- Контент -->
-    <div class="content" id="content">
-        <!-- Здесь будет динамический контент -->
-    </div>
+    <div class="content" id="content"></div>
 
-    <!-- Модальное окно создания репозитория -->
-    <div class="modal-overlay" id="createRepoModal">
-        <div class="modal">
-            <h2>Создать новый репозиторий</h2>
-            <input type="text" class="input" id="repoNameInput" placeholder="Название репозитория" />
-            <textarea class="input" id="repoDescInput" placeholder="Описание (необязательно)" rows="3"></textarea>
-            <div class="modal-buttons">
-                <button class="btn" onclick="closeModal('createRepoModal')">Отмена</button>
-                <button class="btn btn-primary" onclick="createRepo()">Создать</button>
-            </div>
+    <div class="modal" id="createRepoModal">
+        <div class="modal-content">
+            <h2>Создать репозиторий</h2>
+            <input type="text" id="repoName" placeholder="Название репозитория">
+            <textarea id="repoDesc" placeholder="Описание" rows="3"></textarea>
+            <button onclick="createRepo()">Создать</button>
+            <button class="btn-secondary" onclick="closeModal('createRepoModal')" style="margin-left: 10px;">Отмена</button>
         </div>
     </div>
 
-    <!-- Модальное окно создания файла -->
-    <div class="modal-overlay" id="createFileModal">
-        <div class="modal">
-            <h2>Создать новый файл</h2>
-            <input type="text" class="input" id="fileNameInput" placeholder="Название файла (например, index.html)" />
-            <div class="modal-buttons">
-                <button class="btn" onclick="closeModal('createFileModal')">Отмена</button>
-                <button class="btn btn-primary" onclick="createFile()">Создать</button>
-            </div>
+    <div class="modal" id="createFileModal">
+        <div class="modal-content">
+            <h2>Создать файл</h2>
+            <input type="text" id="fileName" placeholder="Название файла (например, index.html)">
+            <button onclick="createFile()">Создать</button>
+            <button class="btn-secondary" onclick="closeModal('createFileModal')" style="margin-left: 10px;">Отмена</button>
         </div>
     </div>
 
-    <!-- Уведомление -->
     <div class="toast" id="toast"></div>
 
     <script>
-        // ============ ДАННЫЕ ============
         let repos = [];
         let currentRepo = null;
         let currentFile = null;
         let currentTab = 'repos';
 
-        // Загрузка данных из localStorage
+        // Загрузка из localStorage
         function loadData() {
-            const saved = localStorage.getItem('chugurhub_repos');
+            const saved = localStorage.getItem('chugurhub_data');
             if (saved) {
                 try {
                     repos = JSON.parse(saved);
@@ -446,17 +282,17 @@
                 }
             }
             
-            // Если нет репозиториев, создаём демо
             if (repos.length === 0) {
+                // Создаём демо-репозиторий
                 repos.push({
-                    id: generateId(),
-                    name: 'my-first-repo',
-                    description: 'Демо репозиторий',
+                    id: Date.now(),
+                    name: 'demo-site',
+                    description: 'Демонстрационный сайт',
                     files: [
                         {
-                            id: generateId(),
+                            id: Date.now() + 1,
                             name: 'index.html',
-                            content: '<!DOCTYPE html>\n<html>\n<head>\n    <title>Мой сайт</title>\n    <style>\n        body {\n            font-family: Arial;\n            text-align: center;\n            padding: 50px;\n            background: #f0f0f0;\n        }\n        h1 { color: #333; }\n    </style>\n</head>\n<body>\n    <h1>Привет, ChugurHub!</h1>\n    <p>Это мой первый сайт</p>\n</body>\n</html>'
+                            content: '<!DOCTYPE html>\n<html>\n<head>\n    <title>Мой сайт</title>\n    <style>\n        body {\n            font-family: Arial;\n            text-align: center;\n            padding: 50px;\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n            color: white;\n        }\n        h1 { font-size: 3em; }\n    </style>\n</head>\n<body>\n    <h1>🚀 ChugurHub работает!</h1>\n    <p>Это демонстрационная страница</p>\n</body>\n</html>'
                         }
                     ]
                 });
@@ -465,208 +301,81 @@
         }
 
         function saveData() {
-            localStorage.setItem('chugurhub_repos', JSON.stringify(repos));
+            localStorage.setItem('chugurhub_data', JSON.stringify(repos));
         }
 
-        function generateId() {
-            return Date.now() + Math.random().toString(36).substr(2, 9);
-        }
-
-        // ============ НАВИГАЦИЯ ============
-        function switchTab(tab) {
+        function switchTab(tab, element) {
             currentTab = tab;
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            element.classList.add('active');
+            
             if (tab === 'repos') {
-                document.querySelectorAll('.tab')[0].classList.add('active');
-                renderReposList();
+                showReposList();
             } else {
-                document.querySelectorAll('.tab')[1].classList.add('active');
-                renderPagesList();
+                showPagesList();
             }
         }
 
-        // ============ ОТОБРАЖЕНИЕ ============
-        function renderReposList() {
+        function showReposList() {
             const content = document.getElementById('content');
+            
             if (repos.length === 0) {
-                content.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">📦</div>
-                        <h3>Нет репозиториев</h3>
-                        <p>Создайте свой первый репозиторий!</p>
-                    </div>
-                `;
+                content.innerHTML = '<div class="empty-state"><div class="icon">📦</div><h2>Нет репозиториев</h2><p>Создайте свой первый репозиторий!</p></div>';
                 return;
             }
 
-            let html = '<div class="repo-list">';
+            let html = '';
             repos.forEach(repo => {
                 const fileCount = repo.files ? repo.files.length : 0;
-                html += `
-                    <div class="repo-card" onclick="openRepo('${repo.id}')">
-                        <h3>📁 ${repo.name}</h3>
-                        <p>${repo.description || 'Нет описания'} • ${fileCount} файл(ов)</p>
-                    </div>
-                `;
+                html += '<div class="repo-card" onclick="openRepo(' + repo.id + ')">';
+                html += '<h3>📁 ' + repo.name + '</h3>';
+                html += '<p>' + (repo.description || 'Нет описания') + ' • ' + fileCount + ' файл(ов)</p>';
+                html += '</div>';
             });
-            html += '</div>';
+            
             content.innerHTML = html;
         }
 
-        function renderPagesList() {
+        function showPagesList() {
             const content = document.getElementById('content');
+            
             const pagesRepos = repos.filter(repo => 
-                repo.files && repo.files.some(f => f.name === 'index.html' && f.content.trim() !== '')
+                repo.files && repo.files.some(f => f.name === 'index.html')
             );
 
             if (pagesRepos.length === 0) {
-                content.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">🌐</div>
-                        <h3>Нет доступных страниц</h3>
-                        <p>Создайте репозиторий с файлом index.html, чтобы он появился здесь</p>
-                    </div>
-                `;
+                content.innerHTML = '<div class="empty-state"><div class="icon">🌐</div><h2>Нет страниц</h2><p>Создайте репозиторий с файлом index.html</p></div>';
                 return;
             }
 
-            let html = '<div class="repo-list">';
+            let html = '';
             pagesRepos.forEach(repo => {
-                html += `
-                    <div class="repo-card" onclick="openPage('${repo.id}')">
-                        <h3>🌐 ${repo.name}</h3>
-                        <p>Открыть страницу</p>
-                    </div>
-                `;
+                html += '<div class="repo-card" onclick="openPage(' + repo.id + ')">';
+                html += '<h3>🌐 ' + repo.name + '</h3>';
+                html += '<p>Открыть страницу</p>';
+                html += '</div>';
             });
-            html += '</div>';
+            
             content.innerHTML = html;
         }
 
-        function openRepo(repoId) {
-            currentRepo = repos.find(r => r.id === repoId);
-            if (!currentRepo) return;
-            renderRepoEditor();
-        }
-
-        function renderRepoEditor() {
-            const content = document.getElementById('content');
-            let html = `
-                <div class="editor-header">
-                    <button class="btn" onclick="switchTab('repos')">← Назад</button>
-                    <h2>📁 ${currentRepo.name}</h2>
-                    <button class="btn btn-primary" onclick="showCreateFileModal()">+ Файл</button>
-                </div>
-                <div class="file-list">
-            `;
-
-            if (currentRepo.files && currentRepo.files.length > 0) {
-                currentRepo.files.forEach(file => {
-                    const icon = getFileIcon(file.name);
-                    html += `
-                        <div class="file-item">
-                            <span class="file-icon">${icon}</span>
-                            <span class="file-name">${file.name}</span>
-                            <button class="btn" onclick="event.stopPropagation(); openFile('${file.id}')">Открыть</button>
-                            <button class="btn btn-danger" onclick="event.stopPropagation(); deleteFile('${file.id}')">🗑</button>
-                        </div>
-                    `;
-                });
-            } else {
-                html += '<p style="color: var(--muted); text-align: center; padding: 20px;">Нет файлов. Создайте первый файл!</p>';
-            }
-
-            html += '</div>';
-            content.innerHTML = html;
-        }
-
-        function openFile(fileId) {
-            currentFile = currentRepo.files.find(f => f.id === fileId);
-            if (!currentFile) return;
-            renderFileEditor();
-        }
-
-        function renderFileEditor() {
-            const content = document.getElementById('content');
-            const isHtml = currentFile.name.endsWith('.html') || currentFile.name.endsWith('.htm');
-            
-            content.innerHTML = `
-                <div class="editor-header">
-                    <button class="btn" onclick="renderRepoEditor()">← Назад</button>
-                    <h2>${getFileIcon(currentFile.name)} ${currentFile.name}</h2>
-                    <button class="btn btn-primary" onclick="saveCurrentFile()">💾 Сохранить</button>
-                    ${isHtml ? '<button class="btn btn-accent" onclick="previewFile()">👁 Просмотр</button>' : ''}
-                </div>
-                <textarea class="code-editor" id="fileContent" spellcheck="false">${escapeHtml(currentFile.content)}</textarea>
-            `;
-
-            // Автосохранение
-            const textarea = document.getElementById('fileContent');
-            textarea.addEventListener('input', function() {
-                currentFile.content = this.value;
-                saveData();
-            });
-        }
-
-        function openPage(repoId) {
-            const repo = repos.find(r => r.id === repoId);
-            if (!repo) return;
-            
-            const indexFile = repo.files.find(f => f.name === 'index.html');
-            if (!indexFile || !indexFile.content.trim()) {
-                showToast('Файл index.html пуст');
-                return;
-            }
-
-            const content = document.getElementById('content');
-            content.innerHTML = `
-                <div class="editor-header">
-                    <button class="btn" onclick="switchTab('pages')">← Назад</button>
-                    <h2>🌐 ${repo.name}</h2>
-                    <button class="btn btn-accent" onclick="openInNewTab()">↗ Открыть</button>
-                </div>
-                <iframe class="preview-frame" id="previewFrame" srcdoc="${escapeHtml(indexFile.content)}"></iframe>
-            `;
-        }
-
-        function openInNewTab() {
-            const repo = currentRepo;
-            if (!repo) return;
-            const indexFile = repo.files.find(f => f.name === 'index.html');
-            if (indexFile) {
-                const blob = new Blob([indexFile.content], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-                window.open(url, '_blank');
-            }
-        }
-
-        function previewFile() {
-            if (!currentFile) return;
-            const content = document.getElementById('fileContent').value;
-            const blob = new Blob([content], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            window.open(url, '_blank');
-        }
-
-        // ============ CRUD ОПЕРАЦИИ ============
-        function showCreateRepoModal() {
+        function showCreateRepo() {
             document.getElementById('createRepoModal').classList.add('show');
-            document.getElementById('repoNameInput').value = '';
-            document.getElementById('repoDescInput').value = '';
-            document.getElementById('repoNameInput').focus();
+            document.getElementById('repoName').value = '';
+            document.getElementById('repoDesc').value = '';
         }
 
         function createRepo() {
-            const name = document.getElementById('repoNameInput').value.trim();
-            const description = document.getElementById('repoDescInput').value.trim();
+            const name = document.getElementById('repoName').value.trim();
+            const description = document.getElementById('repoDesc').value.trim();
             
             if (!name) {
-                showToast('Введите название репозитория');
+                showToast('Введите название!');
                 return;
             }
 
             const repo = {
-                id: generateId(),
+                id: Date.now(),
                 name: name,
                 description: description,
                 files: []
@@ -675,64 +384,134 @@
             repos.push(repo);
             saveData();
             closeModal('createRepoModal');
-            renderReposList();
-            showToast('Репозиторий создан: ' + name);
+            showReposList();
+            showToast('Репозиторий создан!');
         }
 
-        function showCreateFileModal() {
+        function openRepo(id) {
+            currentRepo = repos.find(r => r.id === id);
+            if (!currentRepo) return;
+            
+            const content = document.getElementById('content');
+            
+            let html = '<div style="margin-bottom: 15px;">';
+            html += '<button class="btn-secondary" onclick="showReposList()">← Назад</button> ';
+            html += '<button onclick="showCreateFile()">+ Файл</button>';
+            html += '</div>';
+            html += '<h2 style="margin-bottom: 15px;">📁 ' + currentRepo.name + '</h2>';
+            
+            if (currentRepo.files && currentRepo.files.length > 0) {
+                currentRepo.files.forEach(file => {
+                    const icon = getFileIcon(file.name);
+                    html += '<div class="file-item">';
+                    html += '<span>' + icon + '</span>';
+                    html += '<span class="file-name">' + file.name + '</span>';
+                    html += '<button onclick="openFile(' + file.id + ')">Открыть</button>';
+                    html += '<button class="btn-danger" onclick="deleteFile(' + file.id + ')">🗑</button>';
+                    html += '</div>';
+                });
+            } else {
+                html += '<p style="color: #8b949e; text-align: center; padding: 20px;">Нет файлов</p>';
+            }
+            
+            content.innerHTML = html;
+        }
+
+        function showCreateFile() {
             document.getElementById('createFileModal').classList.add('show');
-            document.getElementById('fileNameInput').value = '';
-            document.getElementById('fileNameInput').focus();
+            document.getElementById('fileName').value = '';
         }
 
         function createFile() {
-            const name = document.getElementById('fileNameInput').value.trim();
+            const name = document.getElementById('fileName').value.trim();
             
             if (!name) {
-                showToast('Введите название файла');
+                showToast('Введите название файла!');
                 return;
             }
 
             const file = {
-                id: generateId(),
+                id: Date.now(),
                 name: name,
-                content: name.endsWith('.html') ? '<!DOCTYPE html>\n<html>\n<head>\n    <title>Новая страница</title>\n</head>\n<body>\n    \n</body>\n</html>' : ''
+                content: ''
             };
 
             currentRepo.files.push(file);
             saveData();
             closeModal('createFileModal');
-            renderRepoEditor();
-            showToast('Файл создан: ' + name);
+            openRepo(currentRepo.id);
+            showToast('Файл создан!');
         }
 
-        function deleteFile(fileId) {
-            if (confirm('Удалить этот файл?')) {
-                currentRepo.files = currentRepo.files.filter(f => f.id !== fileId);
-                saveData();
-                renderRepoEditor();
-                showToast('Файл удалён');
+        function openFile(id) {
+            currentFile = currentRepo.files.find(f => f.id === id);
+            if (!currentFile) return;
+            
+            const content = document.getElementById('content');
+            
+            let html = '<div style="margin-bottom: 15px;">';
+            html += '<button class="btn-secondary" onclick="openRepo(' + currentRepo.id + ')">← Назад</button> ';
+            html += '<button onclick="saveFile()">💾 Сохранить</button> ';
+            if (currentFile.name.endsWith('.html')) {
+                html += '<button class="btn-preview" onclick="previewFile()">👁 Предпросмотр</button>';
             }
+            html += '</div>';
+            html += '<h3 style="margin-bottom: 10px;">' + getFileIcon(currentFile.name) + ' ' + currentFile.name + '</h3>';
+            html += '<textarea id="fileContent" style="min-height: 400px;">' + escapeHtml(currentFile.content) + '</textarea>';
+            
+            content.innerHTML = html;
         }
 
-        function saveCurrentFile() {
+        function saveFile() {
             const textarea = document.getElementById('fileContent');
             if (textarea && currentFile) {
                 currentFile.content = textarea.value;
                 saveData();
-                showToast('Файл сохранён');
+                showToast('Сохранено!');
             }
         }
 
-        // ============ УТИЛИТЫ ============
+        function previewFile() {
+            const textarea = document.getElementById('fileContent');
+            if (textarea) {
+                currentFile.content = textarea.value;
+                saveData();
+                
+                const content = document.getElementById('content');
+                content.innerHTML = '<button class="btn-secondary" onclick="openFile(' + currentFile.id + ')">← Назад</button><br><br>';
+                content.innerHTML += '<iframe srcdoc="' + escapeHtml(currentFile.content) + '"></iframe>';
+            }
+        }
+
+        function openPage(id) {
+            const repo = repos.find(r => r.id === id);
+            if (!repo) return;
+            
+            const indexFile = repo.files.find(f => f.name === 'index.html');
+            if (!indexFile) return;
+            
+            const content = document.getElementById('content');
+            content.innerHTML = '<button class="btn-secondary" onclick="showPagesList()">← Назад</button><br><br>';
+            content.innerHTML += '<h2>🌐 ' + repo.name + '</h2><br>';
+            content.innerHTML += '<iframe srcdoc="' + escapeHtml(indexFile.content) + '"></iframe>';
+        }
+
+        function deleteFile(id) {
+            if (confirm('Удалить этот файл?')) {
+                currentRepo.files = currentRepo.files.filter(f => f.id !== id);
+                saveData();
+                openRepo(currentRepo.id);
+                showToast('Файл удалён');
+            }
+        }
+
         function getFileIcon(name) {
-            if (name.endsWith('.html') || name.endsWith('.htm')) return '🌐';
+            if (name.endsWith('.html')) return '🌐';
             if (name.endsWith('.css')) return '🎨';
             if (name.endsWith('.js')) return '⚡';
             if (name.endsWith('.json')) return '📋';
             if (name.endsWith('.md')) return '📝';
             if (name.endsWith('.py')) return '🐍';
-            if (name.endsWith('.txt')) return '📄';
             return '📄';
         }
 
@@ -759,8 +538,8 @@
         }
 
         // Закрытие модальных окон при клике вне
-        document.querySelectorAll('.modal-overlay').forEach(overlay => {
-            overlay.addEventListener('click', function(e) {
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
                 if (e.target === this) {
                     this.classList.remove('show');
                 }
@@ -769,7 +548,7 @@
 
         // Инициализация
         loadData();
-        renderReposList();
+        showReposList();
     </script>
 </body>
-  </html>
+        </html>
