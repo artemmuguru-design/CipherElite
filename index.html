@@ -2,297 +2,391 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 
-<title>AI 3D Generator</title>
+<title>RNG 3D Legends</title>
 
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
 
 html,body{
     margin:0;
     width:100%;
     height:100%;
     overflow:hidden;
-    background:#070810;
-    color:white;
     font-family:Arial,sans-serif;
-}
-
-.app{
-    width:100%;
-    height:100%;
-    display:flex;
-    flex-direction:column;
-}
-
-header{
-    height:64px;
-    flex-shrink:0;
-    display:flex;
-    align-items:center;
-    padding:0 18px;
-    background:#0c0e18;
-    border-bottom:1px solid #202334;
-}
-
-.logo{
-    font-size:21px;
-    font-weight:800;
-}
-
-.logo b{
-    color:#8b5cf6;
-}
-
-.main{
-    flex:1;
-    min-height:0;
-    display:flex;
-}
-
-.panel{
-    width:320px;
-    flex-shrink:0;
-    background:#0c0e17;
-    border-right:1px solid #202334;
-    padding:22px;
-    overflow:auto;
-}
-
-h1{
-    margin:0 0 8px;
-    font-size:28px;
-}
-
-.desc{
-    color:#888da0;
-    font-size:14px;
-    line-height:1.5;
-    margin-bottom:22px;
-}
-
-label{
-    display:block;
-    color:#aeb2c1;
-    font-size:13px;
-    margin-bottom:7px;
-}
-
-input{
-    width:100%;
-    padding:15px;
-    border-radius:12px;
-    outline:none;
-    border:1px solid #292d40;
-    background:#151824;
+    background:#050611;
     color:white;
-    font-size:16px;
-}
-
-input:focus{
-    border-color:#8b5cf6;
-}
-
-.generate{
-    width:100%;
-    margin-top:10px;
-    padding:15px;
-    border:0;
-    border-radius:12px;
-    color:white;
-    font-size:16px;
-    font-weight:bold;
-    background:linear-gradient(135deg,#7c3aed,#a855f7);
-    cursor:pointer;
-}
-
-.generate:active{
-    transform:scale(.98);
-}
-
-.examples{
-    margin-top:22px;
-}
-
-.examples-title{
-    color:#777c90;
-    font-size:11px;
-    margin-bottom:9px;
-}
-
-.chips{
-    display:flex;
-    flex-wrap:wrap;
-    gap:7px;
-}
-
-.chip{
-    padding:8px 11px;
-    border:1px solid #292d40;
-    border-radius:20px;
-    color:#c7cad4;
-    background:#151824;
-    font-size:12px;
-    cursor:pointer;
-}
-
-.status{
-    margin-top:20px;
-    padding:13px;
-    border-radius:12px;
-    background:#11141f;
-    border:1px solid #222638;
-    color:#8e93a6;
-    font-size:12px;
-    line-height:1.5;
-}
-
-.viewer{
-    position:relative;
-    flex:1;
-    min-width:0;
-    min-height:0;
-    background:
-        radial-gradient(circle at 50% 45%,#17152b 0%,#090a10 42%,#070810 100%);
 }
 
 canvas{
-    width:100%;
-    height:100%;
     display:block;
-    touch-action:none;
 }
 
-.model-title{
-    position:absolute;
-    top:15px;
-    left:15px;
-    z-index:5;
-    padding:9px 13px;
-    border-radius:10px;
-    background:rgba(15,17,27,.8);
-    border:1px solid #292d40;
-    font-size:13px;
+#game{
+    position:fixed;
+    inset:0;
+}
+
+.ui{
+    position:fixed;
+    inset:0;
     pointer-events:none;
 }
 
-.buttons{
+.top{
     position:absolute;
-    bottom:18px;
-    left:15px;
-    right:15px;
-    z-index:5;
+    top:12px;
+    left:12px;
+    right:12px;
+
     display:flex;
-    justify-content:center;
-    gap:8px;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    padding:11px 15px;
+    border-radius:15px;
+
+    background:rgba(8,10,30,.72);
+    border:1px solid rgba(255,255,255,.12);
+
+    backdrop-filter:blur(12px);
+
+    font-weight:900;
+    letter-spacing:1px;
+}
+
+.logo span{
+    color:#887cff;
+}
+
+.coins{
+    display:flex;
+    align-items:center;
+    gap:7px;
+
+    padding:10px 14px;
+
+    border-radius:15px;
+    background:rgba(8,10,30,.72);
+    border:1px solid rgba(255,255,255,.12);
+
+    backdrop-filter:blur(12px);
+
+    font-weight:bold;
+}
+
+.coin{
+    width:22px;
+    height:22px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:50%;
+
+    background:linear-gradient(135deg,#fff36c,#ffad00);
+    color:#704500;
+}
+
+.bottom{
+    position:absolute;
+    bottom:15px;
+    left:50%;
+    transform:translateX(-50%);
+
+    width:min(600px,calc(100% - 25px));
+
+    pointer-events:auto;
+}
+
+.buttons{
+    display:flex;
+    gap:10px;
 }
 
 button{
-    font-family:inherit;
-}
-
-.action{
-    padding:13px 17px;
-    border-radius:11px;
-    border:1px solid #303447;
-    background:rgba(14,16,25,.9);
+    border:0;
     color:white;
-    font-weight:bold;
+    font-weight:900;
     cursor:pointer;
 }
 
-.download{
-    background:white;
-    color:#08090e;
-    border-color:white;
+.summon{
+    flex:1;
+
+    padding:17px;
+
+    border-radius:17px;
+
+    background:linear-gradient(135deg,#6657ff,#a54dff);
+
+    box-shadow:
+        0 8px 30px rgba(108,83,255,.35);
 }
 
-.loading{
-    position:absolute;
-    inset:0;
-    z-index:10;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    background:rgba(5,6,10,.65);
-    backdrop-filter:blur(7px);
+.ten{
+    flex:1;
+
+    padding:17px;
+
+    border-radius:17px;
+
+    background:linear-gradient(135deg,#ff5667,#ff914f);
+
+    box-shadow:
+        0 8px 30px rgba(255,86,103,.3);
 }
 
-.loading.show{
-    display:flex;
+button:active{
+    transform:scale(.96);
 }
 
-.loader{
+.hint{
+    margin-top:8px;
+
     text-align:center;
-    background:#11131d;
-    border:1px solid #2a2e40;
-    border-radius:16px;
-    padding:24px 30px;
-}
 
-.spinner{
-    width:35px;
-    height:35px;
-    margin:auto auto 13px;
-    border:3px solid #303448;
-    border-top-color:#9b6cff;
-    border-radius:50%;
-    animation:spin .7s linear infinite;
-}
-
-@keyframes spin{
-    to{transform:rotate(360deg)}
-}
-
-.error{
-    position:absolute;
-    top:70px;
-    left:50%;
-    transform:translateX(-50%);
-    z-index:20;
-    display:none;
-    max-width:90%;
-    padding:12px 15px;
-    border-radius:10px;
-    background:#32151a;
-    border:1px solid #6d2933;
-    color:#ffb4bd;
+    color:#9299bd;
     font-size:12px;
 }
 
-@media(max-width:700px){
+.panel{
+    position:absolute;
 
-    header{
-        height:54px;
+    top:75px;
+    right:12px;
+
+    width:185px;
+
+    padding:13px;
+
+    border-radius:18px;
+
+    background:rgba(7,9,28,.7);
+    border:1px solid rgba(255,255,255,.1);
+
+    backdrop-filter:blur(12px);
+
+    pointer-events:auto;
+}
+
+.panel h3{
+    margin:0 0 10px;
+    font-size:14px;
+}
+
+.stat{
+    display:flex;
+    justify-content:space-between;
+
+    padding:6px 0;
+
+    color:#9ea6c7;
+
+    font-size:12px;
+}
+
+.stat b{
+    color:white;
+}
+
+.collection{
+    margin-top:8px;
+
+    max-height:110px;
+
+    overflow:auto;
+
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:5px;
+}
+
+.smallChar{
+    height:28px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:7px;
+
+    background:rgba(255,255,255,.06);
+
+    font-size:17px;
+}
+
+.locked{
+    opacity:.25;
+    filter:grayscale(1);
+}
+
+.result{
+    position:fixed;
+    inset:0;
+
+    display:none;
+
+    align-items:center;
+    justify-content:center;
+
+    background:rgba(1,2,10,.76);
+
+    backdrop-filter:blur(10px);
+
+    z-index:20;
+
+    pointer-events:auto;
+}
+
+.result.show{
+    display:flex;
+}
+
+.card{
+    width:min(390px,calc(100% - 30px));
+
+    padding:28px;
+
+    text-align:center;
+
+    border-radius:28px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.14),
+            rgba(255,255,255,.04)
+        );
+
+    border:1px solid rgba(255,255,255,.18);
+
+    box-shadow:0 30px 100px rgba(0,0,0,.6);
+
+    animation:appear .45s cubic-bezier(.2,.9,.2,1);
+}
+
+@keyframes appear{
+    from{
+        opacity:0;
+        transform:scale(.6);
     }
 
-    .main{
-        flex-direction:column;
+    to{
+        opacity:1;
+        transform:scale(1);
     }
+}
+
+.resultIcon{
+    font-size:95px;
+    margin:10px;
+
+    filter:drop-shadow(0 0 25px currentColor);
+}
+
+.resultName{
+    font-size:30px;
+    font-weight:900;
+}
+
+.resultRarity{
+    display:inline-block;
+
+    margin:10px 0;
+
+    padding:7px 15px;
+
+    border-radius:20px;
+
+    font-weight:900;
+}
+
+.common{
+    color:#c1c6d2;
+}
+
+.rare{
+    color:#4fa8ff;
+}
+
+.epic{
+    color:#bd62ff;
+}
+
+.legendary{
+    color:#ffd047;
+}
+
+.mythic{
+    color:#ff4d7c;
+}
+
+.description{
+    color:#aab1cd;
+    line-height:1.5;
+    margin:10px 0 20px;
+}
+
+.close{
+    width:100%;
+
+    padding:14px;
+
+    border-radius:14px;
+
+    background:white;
+    color:#12152a;
+}
+
+.flash{
+    position:fixed;
+    inset:0;
+
+    background:white;
+
+    opacity:0;
+
+    pointer-events:none;
+
+    z-index:15;
+}
+
+.flash.active{
+    animation:flash .5s ease;
+}
+
+@keyframes flash{
+    0%{opacity:0}
+    20%{opacity:.8}
+    100%{opacity:0}
+}
+
+@media(max-width:600px){
 
     .panel{
-        width:100%;
-        height:42%;
-        border-right:0;
-        border-bottom:1px solid #202334;
-        padding:15px;
+        top:auto;
+        bottom:100px;
+        right:10px;
+        width:150px;
     }
 
-    h1{
-        font-size:23px;
+    .logo{
+        font-size:13px;
     }
 
-    .desc{
-        margin-bottom:12px;
+    .coins{
+        font-size:13px;
     }
 
-    .examples{
-        margin-top:13px;
-    }
-
-    .viewer{
-        height:58%;
+    .bottom{
+        bottom:10px;
     }
 }
 </style>
@@ -300,1551 +394,704 @@ button{
 
 <body>
 
-<div class="app">
+<div id="game"></div>
 
-<header>
-    <div class="logo">Text<b>3D</b></div>
-</header>
+<div class="ui">
 
-<div class="main">
+    <div class="top">
 
-<div class="panel">
-
-    <h1>Создай 3D</h1>
-
-    <div class="desc">
-        Напиши название объекта. Например:
-        <b>стул</b>, <b>машина</b> или <b>дом</b>.
-    </div>
-
-    <label>Что создать?</label>
-
-    <input
-        id="prompt"
-        value="стул"
-        placeholder="Например: стул"
-        autocomplete="off"
-    >
-
-    <button class="generate" id="generateBtn">
-        ✨ СОЗДАТЬ 3D
-    </button>
-
-    <div class="examples">
-
-        <div class="examples-title">
-            БЫСТРЫЕ ПРИМЕРЫ
+        <div class="logo">
+            RNG <span>3D LEGENDS</span>
         </div>
 
-        <div class="chips">
-            <div class="chip" data-name="стул">🪑 Стул</div>
-            <div class="chip" data-name="стол">Стол</div>
-            <div class="chip" data-name="машина">🚗 Машина</div>
-            <div class="chip" data-name="дом">🏠 Дом</div>
-            <div class="chip" data-name="дерево">🌳 Дерево</div>
-            <div class="chip" data-name="лампа">💡 Лампа</div>
-            <div class="chip" data-name="меч">⚔️ Меч</div>
-            <div class="chip" data-name="робот">🤖 Робот</div>
-            <div class="chip" data-name="бутылка">Бутылка</div>
-            <div class="chip" data-name="куб">Куб</div>
+        <div class="coins">
+            <div class="coin">★</div>
+            <span id="coins">1000</span>
         </div>
 
     </div>
 
-    <div class="status" id="status">
-        Готово. Напиши объект и нажми «Создать 3D».
-    </div>
 
-</div>
+    <div class="panel">
 
-<div class="viewer">
+        <h3>📊 Профиль</h3>
 
-    <div class="model-title" id="modelTitle">
-        3D Preview
-    </div>
+        <div class="stat">
+            <span>Призывы</span>
+            <b id="total">0</b>
+        </div>
 
-    <div class="error" id="error"></div>
+        <div class="stat">
+            <span>Коллекция</span>
+            <b id="owned">0/15</b>
+        </div>
 
-    <canvas id="canvas"></canvas>
+        <div class="stat">
+            <span>Лучшее</span>
+            <b id="best">—</b>
+        </div>
 
-    <div class="buttons">
+        <h3 style="margin-top:10px">
+            📖 Герои
+        </h3>
 
-        <button class="action" id="resetBtn">
-            ⟳ Сбросить
-        </button>
-
-        <button class="action" id="leftBtn">
-            ↶
-        </button>
-
-        <button class="action" id="rightBtn">
-            ↷
-        </button>
-
-        <button class="action download" id="downloadBtn">
-            ⬇ Скачать GLB
-        </button>
+        <div
+            class="collection"
+            id="collection">
+        </div>
 
     </div>
 
-    <div class="loading" id="loading">
 
-        <div class="loader">
+    <div class="bottom">
 
-            <div class="spinner"></div>
+        <div class="buttons">
 
-            <div>
-                Создаём модель...
-            </div>
+            <button
+                class="summon"
+                onclick="summon(1)">
+                ✨ ПРИЗВАТЬ · 100
+            </button>
 
+            <button
+                class="ten"
+                onclick="summon(10)">
+                🔥 ×10 · 900
+            </button>
+
+        </div>
+
+        <div class="hint">
+            👆 Вращай 3D-мир пальцем или мышью
         </div>
 
     </div>
 
 </div>
 
-</div>
+
+<div
+    class="flash"
+    id="flash">
 </div>
 
 
-<script type="module">
+<div
+    class="result"
+    id="result">
+
+    <div class="card">
+
+        <div
+            class="resultIcon"
+            id="resultIcon">
+            ❓
+        </div>
+
+        <div
+            class="resultName"
+            id="resultName">
+            Герой
+        </div>
+
+        <div
+            class="resultRarity"
+            id="resultRarity">
+            Редкость
+        </div>
+
+        <div
+            class="description"
+            id="resultDescription">
+            Описание
+        </div>
+
+        <button
+            class="close"
+            onclick="closeResult()">
+            ПРОДОЛЖИТЬ
+        </button>
+
+    </div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+
+<script>
 
 /* =====================================================
-   IMPORT THREE.JS
+   ДАННЫЕ
 ===================================================== */
 
-import * as THREE from
-'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
+const characters = [
 
-import { GLTFExporter } from
-'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/exporters/GLTFExporter.js';
+    {
+        id:1,
+        name:"Новичок",
+        icon:"🧑",
+        rarity:"Обычный",
+        class:"common",
+        chance:30,
+        color:0xaaaaaa,
+        description:"Начальный герой путешественника."
+    },
+
+    {
+        id:2,
+        name:"Лучник",
+        icon:"🏹",
+        rarity:"Обычный",
+        class:"common",
+        chance:30,
+        color:0xb0b8c8,
+        description:"Меткий стрелок."
+    },
+
+    {
+        id:3,
+        name:"Рыцарь",
+        icon:"🛡️",
+        rarity:"Редкий",
+        class:"rare",
+        chance:12,
+        color:0x349cff,
+        description:"Защитник древнего королевства."
+    },
+
+    {
+        id:4,
+        name:"Маг",
+        icon:"🧙",
+        rarity:"Редкий",
+        class:"rare",
+        chance:13,
+        color:0x477cff,
+        description:"Повелитель магической энергии."
+    },
+
+    {
+        id:5,
+        name:"Самурай",
+        icon:"🥷",
+        rarity:"Эпический",
+        class:"epic",
+        chance:5,
+        color:0xa84cff,
+        description:"Мастер древнего меча."
+    },
+
+    {
+        id:6,
+        name:"Вампир",
+        icon:"🧛",
+        rarity:"Эпический",
+        class:"epic",
+        chance:5,
+        color:0xc13cff,
+        description:"Таинственный бессмертный."
+    },
+
+    {
+        id:7,
+        name:"Дракон",
+        icon:"🐉",
+        rarity:"Легендарный",
+        class:"legendary",
+        chance:1.5,
+        color:0xffae19,
+        description:"Древний повелитель огня."
+    },
+
+    {
+        id:8,
+        name:"Повелитель",
+        icon:"👑",
+        rarity:"Легендарный",
+        class:"legendary",
+        chance:1.5,
+        color:0xffd429,
+        description:"Король потерянного мира."
+    },
+
+    {
+        id:9,
+        name:"Космический Бог",
+        icon:"🌌",
+        rarity:"Мифический",
+        class:"mythic",
+        chance:.5,
+        color:0xff3b82,
+        description:"Существо за пределами пространства."
+    },
+
+    {
+        id:10,
+        name:"Тёмный Бог",
+        icon:"☠️",
+        rarity:"Мифический",
+        class:"mythic",
+        chance:.5,
+        color:0xff174f,
+        description:"Один из сильнейших героев."
+    },
+
+    {
+        id:11,
+        name:"Пират",
+        icon:"🏴‍☠️",
+        rarity:"Обычный",
+        class:"common",
+        chance:0,
+        color:0x999999
+    },
+
+    {
+        id:12,
+        name:"Алхимик",
+        icon:"⚗️",
+        rarity:"Редкий",
+        class:"rare",
+        chance:0,
+        color:0x349cff
+    },
+
+    {
+        id:13,
+        name:"Демон",
+        icon:"👹",
+        rarity:"Эпический",
+        class:"epic",
+        chance:0,
+        color:0xb34cff
+    },
+
+    {
+        id:14,
+        name:"Феникс",
+        icon:"🔥",
+        rarity:"Легендарный",
+        class:"legendary",
+        chance:0,
+        color:0xff9d00
+    },
+
+    {
+        id:15,
+        name:"???",
+        icon:"👁️",
+        rarity:"Мифический",
+        class:"mythic",
+        chance:0,
+        color:0xff2777
+    }
+
+];
 
 
 /* =====================================================
-   ELEMENTS
+   СОХРАНЕНИЕ
 ===================================================== */
 
-const canvas =
-document.getElementById("canvas");
+let game =
+JSON.parse(
+    localStorage.getItem("rng3D")
+) || {
 
-const promptInput =
-document.getElementById("prompt");
+    coins:1000,
+    total:0,
+    owned:[],
+    best:0
 
-const loading =
-document.getElementById("loading");
+};
 
-const errorBox =
-document.getElementById("error");
 
-const status =
-document.getElementById("status");
+function save(){
 
-const modelTitle =
-document.getElementById("modelTitle");
+    localStorage.setItem(
+        "rng3D",
+        JSON.stringify(game)
+    );
+
+}
 
 
 /* =====================================================
-   THREE
+   THREE.JS
 ===================================================== */
 
 let scene;
-
 let camera;
-
 let renderer;
 
-let currentModel = null;
+let crystal;
+let portal;
+let stars=[];
 
-let rotationY = 0;
+let mouseX=0;
+let mouseY=0;
 
-let rotationX = 0;
+let targetX=0;
+let targetY=0;
 
-let distance = 6;
-
-let dragging = false;
-
-let lastX = 0;
-
-let lastY = 0;
+let clock = new THREE.Clock();
 
 
-/* =====================================================
-   INIT
-===================================================== */
-
-function init(){
+function init3D(){
 
     scene =
     new THREE.Scene();
 
-    scene.background =
-    new THREE.Color(0x08090f);
+    scene.fog =
+    new THREE.FogExp2(
+        0x050611,
+        .035
+    );
 
 
     camera =
     new THREE.PerspectiveCamera(
-        45,
-        1,
-        0.1,
+        60,
+        innerWidth/innerHeight,
+        .1,
         100
     );
 
-
     camera.position.set(
         0,
-        1,
-        distance
+        1.2,
+        7
     );
 
 
     renderer =
     new THREE.WebGLRenderer({
-        canvas,
         antialias:true,
-        alpha:false,
-        preserveDrawingBuffer:true
+        alpha:true
     });
-
 
     renderer.setPixelRatio(
         Math.min(
-            window.devicePixelRatio || 1,
+            devicePixelRatio,
             2
         )
     );
 
-
-    renderer.outputColorSpace =
-    THREE.SRGBColorSpace;
-
-
-    /* LIGHT */
-
-    const hemi =
-    new THREE.HemisphereLight(
-        0xffffff,
-        0x222233,
-        2.5
+    renderer.setSize(
+        innerWidth,
+        innerHeight
     );
 
-    scene.add(hemi);
+    renderer.outputColorSpace =
+        THREE.SRGBColorSpace;
+
+    document
+        .getElementById("game")
+        .appendChild(renderer.domElement);
+
+
+    /* Свет */
+
+    const ambient =
+    new THREE.AmbientLight(
+        0x8b91ff,
+        1.4
+    );
+
+    scene.add(ambient);
 
 
     const light =
-    new THREE.DirectionalLight(
-        0xffffff,
-        4
+    new THREE.PointLight(
+        0x765fff,
+        12,
+        15
     );
 
     light.position.set(
-        4,
-        7,
-        6
+        0,
+        2,
+        3
     );
 
     scene.add(light);
 
 
     const light2 =
-    new THREE.DirectionalLight(
-        0x7777ff,
-        2
+    new THREE.PointLight(
+        0xff397d,
+        5,
+        12
     );
 
     light2.position.set(
-        -5,
-        3,
-        -4
+        -4,
+        1,
+        -2
     );
 
     scene.add(light2);
 
 
-    /* FLOOR */
+    createFloor();
+    createPortal();
+    createCrystal();
+    createStars();
+
+    animate();
+
+}
+
+
+/* =====================================================
+   ПОЛ
+===================================================== */
+
+function createFloor(){
+
+    const geometry =
+    new THREE.CircleGeometry(
+        8,
+        64
+    );
+
+    const material =
+    new THREE.MeshStandardMaterial({
+        color:0x07091b,
+        roughness:.8,
+        metalness:.2
+    });
 
     const floor =
     new THREE.Mesh(
-        new THREE.CircleGeometry(
-            5,
-            64
-        ),
-        new THREE.MeshStandardMaterial({
-            color:0x10121b,
-            roughness:.9
-        })
+        geometry,
+        material
     );
 
     floor.rotation.x =
-    -Math.PI / 2;
+        -Math.PI/2;
 
     floor.position.y =
-    -1.6;
+        -1.2;
 
     scene.add(floor);
 
 
-    resize();
-
-
-    window.addEventListener(
-        "resize",
-        resize
+    const grid =
+    new THREE.GridHelper(
+        20,
+        30,
+        0x27264e,
+        0x11132d
     );
 
+    grid.position.y =
+        -1.18;
 
-    setupControls();
+    scene.add(grid);
 
-
-    animate();
-
-
-    createModel("стул");
 }
 
 
 /* =====================================================
-   RESIZE
+   ПОРТАЛ
 ===================================================== */
 
-function resize(){
+function createPortal(){
 
-    const width =
-    canvas.clientWidth;
-
-    const height =
-    canvas.clientHeight;
-
-
-    if(width <= 0 || height <= 0)
-        return;
-
-
-    camera.aspect =
-    width / height;
-
-    camera.updateProjectionMatrix();
-
-
-    renderer.setSize(
-        width,
-        height,
-        false
-    );
-}
-
-
-/* =====================================================
-   MATERIAL
-===================================================== */
-
-function mat(color){
-
-    return new THREE.MeshStandardMaterial({
-
-        color,
-
-        roughness:.55,
-
-        metalness:.08
-
-    });
-}
-
-
-/* =====================================================
-   CUBE
-===================================================== */
-
-function box(
-    x,y,z,
-    sx,sy,sz,
-    color
-){
-
-    const mesh =
-    new THREE.Mesh(
-
-        new THREE.BoxGeometry(
-            sx,sy,sz
-        ),
-
-        mat(color)
-
-    );
-
-    mesh.position.set(
-        x,y,z
-    );
-
-    return mesh;
-}
-
-
-/* =====================================================
-   CYLINDER
-===================================================== */
-
-function cyl(
-    x,y,z,
-    r,h,
-    color
-){
-
-    const mesh =
-    new THREE.Mesh(
-
-        new THREE.CylinderGeometry(
-            r,r,h,32
-        ),
-
-        mat(color)
-
-    );
-
-    mesh.position.set(
-        x,y,z
-    );
-
-    return mesh;
-}
-
-
-/* =====================================================
-   SPHERE
-===================================================== */
-
-function ball(
-    x,y,z,
-    r,
-    color
-){
-
-    const mesh =
-    new THREE.Mesh(
-
-        new THREE.SphereGeometry(
-            r,
-            32,
-            20
-        ),
-
-        mat(color)
-
-    );
-
-    mesh.position.set(
-        x,y,z
-    );
-
-    return mesh;
-}
-
-
-/* =====================================================
-   CHAIR
-===================================================== */
-
-function chair(){
-
-    const g =
+    portal =
     new THREE.Group();
 
-    const wood =
-    0x9b6038;
 
-
-    /* seat */
-
-    g.add(
-        box(
-            0,
-            0.45,
-            0,
-            2.5,
-            .35,
-            2.5,
-            wood
-        )
+    const ringGeometry =
+    new THREE.TorusGeometry(
+        2.1,
+        .08,
+        16,
+        100
     );
 
-
-    /* legs */
-
-    [
-        [-.9,-.6,-.9],
-        [.9,-.6,-.9],
-        [-.9,-.6,.9],
-        [.9,-.6,.9]
-
-    ].forEach(p=>{
-
-        g.add(
-            box(
-                p[0],
-                p[1],
-                p[2],
-                .3,
-                2.1,
-                .3,
-                wood
-            )
-        );
-
+    const ringMaterial =
+    new THREE.MeshBasicMaterial({
+        color:0x7166ff
     });
 
 
-    /* back */
-
-    g.add(
-        box(
-            0,
-            1.65,
-            .98,
-            2.5,
-            2.2,
-            .28,
-            wood
-        )
-    );
-
-
-    return g;
-}
-
-
-/* =====================================================
-   TABLE
-===================================================== */
-
-function table(){
-
-    const g =
-    new THREE.Group();
-
-    const wood =
-    0x8d5b39;
-
-
-    g.add(
-        box(
-            0,
-            1.2,
-            0,
-            4.2,
-            .35,
-            2.5,
-            wood
-        )
-    );
-
-
-    [
-        [-1.6,0,-.8],
-        [1.6,0,-.8],
-        [-1.6,0,.8],
-        [1.6,0,.8]
-
-    ].forEach(p=>{
-
-        g.add(
-            box(
-                p[0],
-                p[1],
-                p[2],
-                .35,
-                2.4,
-                .35,
-                wood
-            )
-        );
-
-    });
-
-
-    return g;
-}
-
-
-/* =====================================================
-   HOUSE
-===================================================== */
-
-function house(){
-
-    const g =
-    new THREE.Group();
-
-
-    g.add(
-        box(
-            0,
-            0,
-            0,
-            4,
-            3,
-            3.3,
-            0xd19a64
-        )
-    );
-
-
-    const roof =
+    const ring =
     new THREE.Mesh(
-
-        new THREE.ConeGeometry(
-            3,
-            2.3,
-            4
-        ),
-
-        mat(0x8e3232)
-
+        ringGeometry,
+        ringMaterial
     );
 
-    roof.position.y =
-    2.6;
-
-    roof.rotation.y =
-    Math.PI / 4;
-
-    g.add(roof);
+    portal.add(ring);
 
 
-    g.add(
-        box(
-            0,
-            -.3,
-            1.67,
-            .9,
-            1.6,
-            .15,
-            0x5b3828
-        )
-    );
-
-
-    g.add(
-        box(
-            -1.2,
-            .5,
-            1.68,
-            .75,
-            .75,
-            .12,
-            0x6db8e8
-        )
-    );
-
-
-    g.add(
-        box(
-            1.2,
-            .5,
-            1.68,
-            .75,
-            .75,
-            .12,
-            0x6db8e8
-        )
-    );
-
-
-    return g;
-}
-
-
-/* =====================================================
-   TREE
-===================================================== */
-
-function tree(){
-
-    const g =
-    new THREE.Group();
-
-
-    g.add(
-        cyl(
-            0,
-            0,
-            0,
-            .45,
-            3,
-            0x70452b
-        )
-    );
-
-
-    g.add(
-        ball(
-            0,
-            2,
-            0,
-            1.6,
-            0x3fa654
-        )
-    );
-
-
-    g.add(
-        ball(
-            -1,
-            2.2,
-            0,
-            1.15,
-            0x48b35d
-        )
-    );
-
-
-    g.add(
-        ball(
-            1,
-            2.2,
-            0,
-            1.15,
-            0x48b35d
-        )
-    );
-
-
-    return g;
-}
-
-
-/* =====================================================
-   LAMP
-===================================================== */
-
-function lamp(){
-
-    const g =
-    new THREE.Group();
-
-
-    g.add(
-        cyl(
-            0,
-            0,
-            0,
-            .13,
-            2.5,
-            0x555a69
-        )
-    );
-
-
-    g.add(
-        cyl(
-            0,
-            -1.25,
-            0,
-            .75,
-            .15,
-            0x30333c
-        )
-    );
-
-
-    const shade =
+    const ring2 =
     new THREE.Mesh(
-
-        new THREE.ConeGeometry(
-            1,
-            .9,
-            32,
-            1,
-            true
-        ),
-
-        mat(0xd4b56c)
-
-    );
-
-    shade.position.y =
-    .95;
-
-    g.add(shade);
-
-
-    g.add(
-        ball(
-            0,
-            .55,
-            0,
-            .28,
-            0xffdd88
-        )
-    );
-
-
-    return g;
-}
-
-
-/* =====================================================
-   SWORD
-===================================================== */
-
-function sword(){
-
-    const g =
-    new THREE.Group();
-
-
-    g.add(
-        box(
-            0,
-            1.3,
-            0,
-            .3,
-            4,
-            .12,
-            0xc9d1dc
-        )
-    );
-
-
-    g.add(
-        box(
-            0,
-            -.65,
-            0,
-            1.5,
-            .18,
-            .25,
-            0xd5a82f
-        )
-    );
-
-
-    g.add(
-        cyl(
-            0,
-            -1.35,
-            0,
-            .16,
-            1.2,
-            0x593725
-        )
-    );
-
-
-    return g;
-}
-
-
-/* =====================================================
-   CAR
-===================================================== */
-
-function car(){
-
-    const g =
-    new THREE.Group();
-
-    const red =
-    0xd93838;
-
-
-    g.add(
-        box(
-            0,
-            .25,
-            0,
-            4.5,
-            1,
-            2,
-            red
-        )
-    );
-
-
-    g.add(
-        box(
-            0,
-            1,
-            0,
-            2.6,
-            .8,
-            1.7,
-            red
-        )
-    );
-
-
-    g.add(
-        box(
-            0,
-            1.05,
-            .86,
-            2.2,
-            .5,
-            .08,
-            0x6b9dbd
-        )
-    );
-
-
-    [
-        [-1.45,-.35,1.05],
-        [1.45,-.35,1.05],
-        [-1.45,-.35,-1.05],
-        [1.45,-.35,-1.05]
-
-    ].forEach(p=>{
-
-        const wheel =
-        new THREE.Mesh(
-
-            new THREE.CylinderGeometry(
-                .5,
-                .5,
-                .35,
-                32
-            ),
-
-            mat(0x16171c)
-
-        );
-
-        wheel.rotation.x =
-        Math.PI / 2;
-
-        wheel.position.set(
-            p[0],
-            p[1],
-            p[2]
-        );
-
-        g.add(wheel);
-
-    });
-
-
-    return g;
-}
-
-
-/* =====================================================
-   ROBOT
-===================================================== */
-
-function robot(){
-
-    const g =
-    new THREE.Group();
-
-    const metal =
-    0x72798b;
-
-
-    g.add(
-        box(
-            0,
-            1,
-            0,
+        new THREE.TorusGeometry(
             1.8,
-            2,
-            1.3,
-            metal
-        )
+            .035,
+            12,
+            80
+        ),
+        new THREE.MeshBasicMaterial({
+            color:0xff3d9c
+        })
     );
 
+    portal.add(ring2);
 
-    g.add(
-        box(
-            0,
-            2.65,
-            0,
-            1.45,
-            1.1,
-            1.2,
-            metal
-        )
+
+    const inner =
+    new THREE.Mesh(
+        new THREE.CircleGeometry(
+            1.75,
+            64
+        ),
+        new THREE.MeshBasicMaterial({
+            color:0x171544,
+            transparent:true,
+            opacity:.55,
+            side:THREE.DoubleSide
+        })
     );
 
+    inner.position.z =
+        -.03;
 
-    g.add(
-        ball(
-            -.35,
-            2.7,
-            .63,
-            .13,
-            0x62a8ff
-        )
-    );
+    portal.add(inner);
 
 
-    g.add(
-        ball(
-            .35,
-            2.7,
-            .63,
-            .13,
-            0x62a8ff
-        )
-    );
+    portal.position.y =
+        1;
 
+    scene.add(portal);
 
-    g.add(
-        box(
-            -.5,
-            -.5,
-            0,
-            .45,
-            1.2,
-            .5,
-            metal
-        )
-    );
-
-
-    g.add(
-        box(
-            .5,
-            -.5,
-            0,
-            .45,
-            1.2,
-            .5,
-            metal
-        )
-    );
-
-
-    g.add(
-        box(
-            -1.25,
-            .9,
-            0,
-            .4,
-            1.7,
-            .45,
-            metal
-        )
-    );
-
-
-    g.add(
-        box(
-            1.25,
-            .9,
-            0,
-            .4,
-            1.7,
-            .45,
-            metal
-        )
-    );
-
-
-    return g;
 }
 
 
 /* =====================================================
-   BOTTLE
+   КРИСТАЛЛ
 ===================================================== */
 
-function bottle(){
+function createCrystal(){
 
-    const g =
-    new THREE.Group();
-
-
-    g.add(
-        cyl(
-            0,
-            0,
-            0,
-            .8,
-            2.8,
-            0x3f9b72
-        )
+    const geometry =
+    new THREE.OctahedronGeometry(
+        1.15,
+        1
     );
 
 
-    g.add(
-        cyl(
-            0,
-            1.7,
-            0,
-            .4,
-            .7,
-            0x3f9b72
-        )
+    const material =
+    new THREE.MeshPhysicalMaterial({
+
+        color:0x7165ff,
+
+        emissive:0x3128bb,
+        emissiveIntensity:1.5,
+
+        metalness:.25,
+        roughness:.12,
+
+        transparent:true,
+        opacity:.95,
+
+        clearcoat:1,
+        clearcoatRoughness:.1
+
+    });
+
+
+    crystal =
+    new THREE.Mesh(
+        geometry,
+        material
     );
 
+    crystal.position.y =
+        1;
 
-    g.add(
-        cyl(
-            0,
-            2.15,
-            0,
-            .25,
-            .25,
-            0xb7b9c2
-        )
+    crystal.rotation.x =
+        .2;
+
+    scene.add(crystal);
+
+
+    /* внутреннее свечение */
+
+    const glow =
+    new THREE.PointLight(
+        0x756bff,
+        7,
+        5
     );
 
+    glow.position.copy(
+        crystal.position
+    );
 
-    return g;
+    scene.add(glow);
+
 }
 
 
 /* =====================================================
-   GENERIC
+   ЗВЁЗДЫ
 ===================================================== */
 
-function generic(){
+function createStars(){
 
-    const g =
-    new THREE.Group();
+    const geometry =
+    new THREE.BufferGeometry();
 
+    const positions=[];
 
-    g.add(
-        box(
-            0,
-            0,
-            0,
-            2.5,
-            2.5,
-            2.5,
-            0x825cff
-        )
-    );
+    for(let i=0;i<900;i++){
 
-
-    return g;
-}
-
-
-/* =====================================================
-   CREATE MODEL
-===================================================== */
-
-function createModel(text){
-
-    const t =
-    text.toLowerCase();
-
-
-    if(t.includes("стул") || t.includes("chair"))
-        return chair();
-
-    if(t.includes("стол") || t.includes("table"))
-        return table();
-
-    if(t.includes("машин") || t.includes("авто") || t.includes("car"))
-        return car();
-
-    if(t.includes("дом") || t.includes("house"))
-        return house();
-
-    if(t.includes("дерев") || t.includes("tree"))
-        return tree();
-
-    if(t.includes("ламп") || t.includes("lamp"))
-        return lamp();
-
-    if(t.includes("меч") || t.includes("sword"))
-        return sword();
-
-    if(t.includes("робот") || t.includes("robot"))
-        return robot();
-
-    if(t.includes("бутыл") || t.includes("bottle"))
-        return bottle();
-
-    return generic();
-}
-
-
-/* =====================================================
-   GENERATE
-===================================================== */
-
-function generate(){
-
-    const text =
-    promptInput.value.trim();
-
-
-    if(!text){
-
-        showError(
-            "Напиши название объекта."
+        positions.push(
+            (Math.random()-.5)*40,
+            Math.random()*20-4,
+            (Math.random()-.5)*40
         );
 
-        return;
     }
 
-
-    loading.classList.add("show");
-
-    status.textContent =
-    "Генерируем модель «" +
-    text +
-    "»...";
-
-
-    /*
-       ВАЖНО:
-       Здесь нет долгого API-запроса.
-       Модель создаётся непосредственно
-       в браузере.
-    */
-
-    setTimeout(()=>{
-
-        try{
-
-            if(currentModel){
-
-                scene.remove(
-                    currentModel
-                );
-
-
-                currentModel.traverse(
-                    obj=>{
-
-                        if(obj.geometry)
-                            obj.geometry.dispose();
-
-                        if(obj.material){
-
-                            if(
-                                Array.isArray(
-                                    obj.material
-                                )
-                            ){
-
-                                obj.material.forEach(
-                                    m=>m.dispose()
-                                );
-
-                            }else{
-
-                                obj.material.dispose();
-
-                            }
-                        }
-
-                    }
-                );
-
-            }
-
-
-            currentModel =
-            createModel(text);
-
-
-            /* CENTER */
-
-            const box3 =
-            new THREE.Box3()
-            .setFromObject(
-                currentModel
-            );
-
-
-            const center =
-            box3.getCenter(
-                new THREE.Vector3()
-            );
-
-
-            currentModel.position.sub(
-                center
-            );
-
-
-            /* SCALE */
-
-            const size =
-            box3.getSize(
-                new THREE.Vector3()
-            );
-
-
-            const max =
-            Math.max(
-                size.x,
-                size.y,
-                size.z
-            );
-
-
-            if(max > 0){
-
-                const scale =
-                3.5 / max;
-
-                currentModel.scale.setScalar(
-                    scale
-                );
-
-            }
-
-
-            currentModel.position.y =
-            -.3;
-
-
-            scene.add(
-                currentModel
-            );
-
-
-            rotationX = 0;
-
-            rotationY = 0;
-
-            distance = 6;
-
-
-            modelTitle.textContent =
-            "3D • " + text;
-
-
-            status.innerHTML =
-            "✅ Модель создана.<br>" +
-            "Вращай её пальцем или мышью.";
-
-
-            loading.classList.remove(
-                "show"
-            );
-
-
-        }catch(err){
-
-            console.error(err);
-
-            loading.classList.remove(
-                "show"
-            );
-
-            showError(
-                "Ошибка создания: " +
-                err.message
-            );
-
-        }
-
-    },250);
-}
-
-
-/* =====================================================
-   ERROR
-===================================================== */
-
-function showError(text){
-
-    errorBox.textContent =
-    text;
-
-    errorBox.style.display =
-    "block";
-
-
-    setTimeout(()=>{
-
-        errorBox.style.display =
-        "none";
-
-    },5000);
-}
-
-
-/* =====================================================
-   CONTROLS
-===================================================== */
-
-function setupControls(){
-
-    canvas.addEventListener(
-        "pointerdown",
-        e=>{
-
-            dragging = true;
-
-            lastX = e.clientX;
-
-            lastY = e.clientY;
-
-            canvas.setPointerCapture(
-                e.pointerId
-            );
-
-        }
+    geometry.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute(
+            positions,
+            3
+        )
     );
 
 
-    canvas.addEventListener(
-        "pointermove",
-        e=>{
-
-            if(!dragging)
-                return;
-
-
-            const dx =
-            e.clientX - lastX;
-
-            const dy =
-            e.clientY - lastY;
-
-
-            rotationY +=
-            dx * .012;
-
-
-            rotationX +=
-            dy * .012;
-
-
-            rotationX =
-            Math.max(
-                -1.4,
-                Math.min(
-                    1.4,
-                    rotationX
-                )
-            );
-
-
-            lastX =
-            e.clientX;
-
-            lastY =
-            e.clientY;
-
-        }
-    );
-
-
-    canvas.addEventListener(
-        "pointerup",
-        ()=>{
-
-            dragging = false;
-
-        }
-    );
-
-
-    canvas.addEventListener(
-        "pointercancel",
-        ()=>{
-
-            dragging = false;
-
-        }
-    );
-
-
-    canvas.addEventListener(
-        "wheel",
-        e=>{
-
-            e.preventDefault();
-
-            distance +=
-            e.deltaY * .006;
-
-
-            distance =
-            Math.max(
-                2.5,
-                Math.min(
-                    12,
-                    distance
-                )
-            );
-
-        },
-        {
-            passive:false
-        }
-    );
-
-
-    document
-    .getElementById("resetBtn")
-    .onclick = ()=>{
-
-        rotationX = 0;
-        rotationY = 0;
-        distance = 6;
-
-    };
-
-
-    document
-    .getElementById("leftBtn")
-    .onclick = ()=>{
-
-        rotationY -= .5;
-
-    };
-
-
-    document
-    .getElementById("rightBtn")
-    .onclick = ()=>{
-
-        rotationY += .5;
-
-    };
-
-
-    document
-    .getElementById("generateBtn")
-    .onclick =
-    generate;
-
-
-    promptInput.addEventListener(
-        "keydown",
-        e=>{
-
-            if(e.key === "Enter")
-                generate();
-
-        }
-    );
-
-
-    document
-    .querySelectorAll(".chip")
-    .forEach(chip=>{
-
-        chip.onclick = ()=>{
-
-            promptInput.value =
-            chip.dataset.name;
-
-            generate();
-
-        };
-
+    const material =
+    new THREE.PointsMaterial({
+        color:0xffffff,
+        size:.035,
+        transparent:true,
+        opacity:.8
     });
 
 
-    document
-    .getElementById("downloadBtn")
-    .onclick =
-    downloadGLB;
+    const points =
+    new THREE.Points(
+        geometry,
+        material
+    );
+
+    scene.add(points);
+
+    stars.push(points);
+
 }
 
 
 /* =====================================================
-   ANIMATION
+   3D АНИМАЦИЯ
 ===================================================== */
 
 function animate(){
@@ -1854,175 +1101,637 @@ function animate(){
     );
 
 
-    if(currentModel){
-
-        currentModel.rotation.y +=
-        (
-            rotationY -
-            currentModel.rotation.y
-        ) * .12;
+    const t =
+        clock.getElapsedTime();
 
 
-        currentModel.rotation.x +=
-        (
-            rotationX -
-            currentModel.rotation.x
-        ) * .12;
+    if(crystal){
+
+        crystal.rotation.y =
+            t*.65;
+
+        crystal.rotation.z =
+            Math.sin(t)*.15;
+
+        crystal.position.y =
+            1 +
+            Math.sin(t*2)*.12;
 
     }
 
 
-    camera.position.z +=
-    (
-        distance -
-        camera.position.z
-    ) * .1;
+    if(portal){
+
+        portal.rotation.z =
+            t*.25;
+
+        portal.children[1]
+            .rotation.z =
+            -t*.6;
+
+    }
+
+
+    camera.position.x +=
+        (targetX-camera.position.x)*.04;
+
+    camera.position.y +=
+        (targetY-camera.position.y)*.04;
+
+
+    camera.lookAt(
+        0,
+        1,
+        0
+    );
 
 
     renderer.render(
         scene,
         camera
     );
+
 }
 
 
 /* =====================================================
-   DOWNLOAD GLB
+   УПРАВЛЕНИЕ КАМЕРОЙ
 ===================================================== */
 
-async function downloadGLB(){
+function moveCamera(x,y){
 
-    if(!currentModel){
+    targetX =
+        x*.7;
 
-        showError(
-            "Сначала создай модель."
+    targetY =
+        1.2+y*.5;
+
+}
+
+
+addEventListener(
+    "mousemove",
+    e=>{
+
+        moveCamera(
+            (e.clientX/innerWidth-.5)*2,
+            -(e.clientY/innerHeight-.5)*2
         );
+
+    }
+);
+
+
+let touchStartX=0;
+let touchStartY=0;
+
+
+addEventListener(
+    "touchstart",
+    e=>{
+
+        touchStartX =
+            e.touches[0].clientX;
+
+        touchStartY =
+            e.touches[0].clientY;
+
+    },
+    {passive:true}
+);
+
+
+addEventListener(
+    "touchmove",
+    e=>{
+
+        const x =
+            (e.touches[0].clientX-touchStartX)
+            /innerWidth;
+
+        const y =
+            (e.touches[0].clientY-touchStartY)
+            /innerHeight;
+
+        moveCamera(
+            x*2,
+            -y*2
+        );
+
+    },
+    {passive:true}
+);
+
+
+/* =====================================================
+   RNG
+===================================================== */
+
+function randomCharacter(){
+
+    const active =
+    characters.filter(
+        c=>c.chance>0
+    );
+
+
+    let total =
+    active.reduce(
+        (a,c)=>a+c.chance,
+        0
+    );
+
+
+    let random =
+    Math.random()*total;
+
+
+    for(const c of active){
+
+        random -= c.chance;
+
+        if(random<=0)
+            return c;
+
+    }
+
+    return active[0];
+
+}
+
+
+/* =====================================================
+   SUMMON
+===================================================== */
+
+function summon(amount){
+
+    const price =
+        amount===10
+        ?900
+        :100;
+
+
+    if(game.coins<price){
+
+        alert("Недостаточно монет!");
 
         return;
+
+    }
+
+
+    game.coins -= price;
+
+
+    let results=[];
+
+
+    for(
+        let i=0;
+        i<amount;
+        i++
+    ){
+
+        const c =
+        randomCharacter();
+
+        results.push(c);
+
+        game.total++;
+
+        register(c);
+
     }
 
 
-    try{
-
-        status.textContent =
-        "Экспортируем GLB...";
+    updateUI();
 
 
-        const exporter =
-        new GLTFExporter();
+    const best =
+    results.reduce(
+        (a,b)=>
+            rank(b)>rank(a)
+            ?b:a
+    );
 
 
-        const result =
-        await exporter.parseAsync(
-            currentModel,
-            {
-                binary:true,
-                onlyVisible:true
-            }
-        );
+    playSummonEffect(
+        best,
+        ()=>{
+            showResult(
+                best,
+                amount===10
+            );
+        }
+    );
 
-
-        const blob =
-        new Blob(
-            [result],
-            {
-                type:
-                "model/gltf-binary"
-            }
-        );
-
-
-        const url =
-        URL.createObjectURL(
-            blob
-        );
-
-
-        const a =
-        document.createElement("a");
-
-
-        let name =
-        promptInput.value.trim();
-
-
-        name =
-        name
-        .replace(
-            /[^a-zA-Zа-яА-ЯёЁ0-9_-]/g,
-            "_"
-        );
-
-
-        if(!name)
-            name = "3d_model";
-
-
-        a.href =
-        url;
-
-        a.download =
-        name + ".glb";
-
-
-        document.body.appendChild(a);
-
-        a.click();
-
-        a.remove();
-
-
-        setTimeout(
-            ()=>{
-                URL.revokeObjectURL(
-                    url
-                );
-            },
-            1000
-        );
-
-
-        status.innerHTML =
-        "✅ GLB готов!<br>" +
-        "Файл можно отправить в Telegram.";
-
-
-    }catch(err){
-
-        console.error(err);
-
-        showError(
-            "Ошибка экспорта GLB: " +
-            err.message
-        );
-
-        status.textContent =
-        "Не удалось экспортировать модель.";
-
-    }
 }
+
+
+/* =====================================================
+   REGISTER
+===================================================== */
+
+function register(c){
+
+    if(
+        !game.owned.includes(c.id)
+    ){
+
+        game.owned.push(c.id);
+
+    }
+
+
+    const r =
+    rank(c);
+
+
+    if(r>game.best)
+        game.best=r;
+
+}
+
+
+/* =====================================================
+   RANK
+===================================================== */
+
+function rank(c){
+
+    if(c.rarity==="Обычный")
+        return 1;
+
+    if(c.rarity==="Редкий")
+        return 2;
+
+    if(c.rarity==="Эпический")
+        return 3;
+
+    if(c.rarity==="Легендарный")
+        return 4;
+
+    if(c.rarity==="Мифический")
+        return 5;
+
+    return 0;
+
+}
+
+
+/* =====================================================
+   ЭФФЕКТ ПРИЗЫВА
+===================================================== */
+
+function playSummonEffect(
+    character,
+    callback
+){
+
+    const flash =
+    document.getElementById(
+        "flash"
+    );
+
+
+    flash.classList.remove(
+        "active"
+    );
+
+    void flash.offsetWidth;
+
+    flash.classList.add(
+        "active"
+    );
+
+
+    const color =
+    character.color;
+
+
+    crystal.material.color
+        .setHex(color);
+
+    crystal.material.emissive
+        .setHex(color);
+
+
+    crystal.scale.set(
+        1.8,
+        1.8,
+        1.8
+    );
+
+
+    createExplosion(
+        color
+    );
+
+
+    setTimeout(()=>{
+
+        crystal.scale.set(
+            1,
+            1,
+            1
+        );
+
+        crystal.material.color
+            .setHex(0x7165ff);
+
+        crystal.material.emissive
+            .setHex(0x3128bb);
+
+        callback();
+
+    },900);
+
+}
+
+
+/* =====================================================
+   EXPLOSION
+===================================================== */
+
+function createExplosion(color){
+
+    for(let i=0;i<80;i++){
+
+        const geometry =
+        new THREE.SphereGeometry(
+            .035,
+            6,
+            6
+        );
+
+
+        const material =
+        new THREE.MeshBasicMaterial({
+            color:color
+        });
+
+
+        const p =
+        new THREE.Mesh(
+            geometry,
+            material
+        );
+
+
+        p.position.copy(
+            crystal.position
+        );
+
+
+        p.userData.velocity =
+        new THREE.Vector3(
+            (Math.random()-.5)*.15,
+            (Math.random()-.5)*.15,
+            (Math.random()-.5)*.15
+        );
+
+
+        scene.add(p);
+
+
+        let life=0;
+
+
+        function move(){
+
+            life+=.016;
+
+            p.position.add(
+                p.userData.velocity
+            );
+
+            p.userData.velocity.y
+                -=.003;
+
+
+            p.scale.multiplyScalar(
+                .97
+            );
+
+
+            if(life<1.3){
+
+                requestAnimationFrame(
+                    move
+                );
+
+            }else{
+
+                scene.remove(p);
+
+            }
+
+        }
+
+
+        move();
+
+    }
+
+}
+
+
+/* =====================================================
+   RESULT
+===================================================== */
+
+function showResult(
+    c,
+    multiple
+){
+
+    document
+        .getElementById("resultIcon")
+        .textContent=c.icon;
+
+
+    document
+        .getElementById("resultName")
+        .textContent=
+        multiple
+        ? "Лучший из ×10: "+c.name
+        : c.name;
+
+
+    const rarity =
+    document.getElementById(
+        "resultRarity"
+    );
+
+
+    rarity.textContent=
+        c.rarity;
+
+
+    rarity.className=
+        "resultRarity "+c.class;
+
+
+    document
+        .getElementById(
+            "resultDescription"
+        )
+        .textContent=
+        c.description;
+
+
+    document
+        .getElementById("result")
+        .classList.add("show");
+
+}
+
+
+/* =====================================================
+   CLOSE
+===================================================== */
+
+function closeResult(){
+
+    document
+        .getElementById("result")
+        .classList.remove("show");
+
+}
+
+
+/* =====================================================
+   UI
+===================================================== */
+
+function updateUI(){
+
+    document
+        .getElementById("coins")
+        .textContent=
+        game.coins.toLocaleString();
+
+
+    document
+        .getElementById("total")
+        .textContent=
+        game.total;
+
+
+    document
+        .getElementById("owned")
+        .textContent=
+        game.owned.length+
+        "/"+
+        characters.length;
+
+
+    const bestNames=[
+        "—",
+        "Обычный",
+        "Редкий",
+        "Эпический",
+        "Легендарный",
+        "Мифический"
+    ];
+
+
+    document
+        .getElementById("best")
+        .textContent=
+        bestNames[game.best];
+
+
+    renderCollection();
+
+    save();
+
+}
+
+
+/* =====================================================
+   COLLECTION
+===================================================== */
+
+function renderCollection(){
+
+    const box =
+    document.getElementById(
+        "collection"
+    );
+
+
+    box.innerHTML="";
+
+
+    characters.forEach(c=>{
+
+        const div =
+        document.createElement(
+            "div"
+        );
+
+
+        const unlocked =
+        game.owned.includes(c.id);
+
+
+        div.className=
+        "smallChar "+
+        (!unlocked?"locked":"");
+
+
+        div.textContent=
+        unlocked
+        ?c.icon
+        :"❔";
+
+
+        div.title=
+        unlocked
+        ?c.name
+        :"Неизвестно";
+
+
+        box.appendChild(div);
+
+    });
+
+}
+
+
+/* =====================================================
+   RESIZE
+===================================================== */
+
+addEventListener(
+    "resize",
+    ()=>{
+
+        camera.aspect =
+            innerWidth/innerHeight;
+
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(
+            innerWidth,
+            innerHeight
+        );
+
+    }
+);
 
 
 /* =====================================================
    START
 ===================================================== */
 
-try{
+init3D();
 
-    init();
-
-}catch(err){
-
-    console.error(err);
-
-    showError(
-        "Не удалось запустить 3D: " +
-        err.message
-    );
-
-}
+updateUI();
 
 </script>
 
 </body>
-      </html>
+    </html>
