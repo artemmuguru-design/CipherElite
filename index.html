@@ -1,626 +1,1234 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ChugurHub</title>
-    
-    <!-- PWA мета-теги -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="ChugurHub">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#0d1117">
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>RNG Legends</title>
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0d1117;
-            color: #e6edf3;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            -webkit-tap-highlight-color: transparent;
-        }
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
 
-        .header {
-            background: #161b22;
-            border-bottom: 1px solid #30363d;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-shrink: 0;
-        }
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    color: white;
+    background:
+        radial-gradient(circle at 50% 20%, #26356b 0%, #10142d 35%, #070912 75%);
+    overflow-x: hidden;
+}
 
-        .header h1 {
-            font-size: 20px;
-            flex: 1;
-            color: #58a6ff;
-            font-weight: bold;
-        }
+button {
+    font: inherit;
+}
 
-        button {
-            background: #238636;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-            touch-action: manipulation;
-        }
+.app {
+    width: 100%;
+    max-width: 900px;
+    margin: auto;
+    padding: 15px;
+}
 
-        button:active {
-            transform: scale(0.95);
-        }
+/* HEADER */
 
-        .btn-secondary {
-            background: #21262d;
-            border: 1px solid #30363d;
-        }
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 14px;
+    margin-bottom: 15px;
 
-        .btn-danger {
-            background: #da3633;
-        }
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 10px 40px rgba(0,0,0,.25);
+}
 
-        .btn-preview {
-            background: #58a6ff;
-            color: #000;
-        }
+.logo {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
 
-        .btn-pages {
-            background: #a371f7;
-            color: white;
-        }
+.logo span {
+    color: #8b7cff;
+}
 
-        .tabs {
-            display: flex;
-            background: #161b22;
-            border-bottom: 1px solid #30363d;
-            flex-shrink: 0;
-        }
+.money {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 13px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.08);
+    font-weight: bold;
+}
 
-        .tab {
-            flex: 1;
-            padding: 12px;
-            text-align: center;
-            cursor: pointer;
-            font-size: 15px;
-            color: #8b949e;
-            border-bottom: 2px solid transparent;
-            user-select: none;
-            touch-action: manipulation;
-        }
+.coin {
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg,#fff36a,#ffb300);
+    color: #8a4b00;
+    font-size: 12px;
+}
 
-        .tab.active {
-            color: #e6edf3;
-            border-bottom-color: #58a6ff;
-        }
+/* MAIN */
 
-        .content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            -webkit-overflow-scrolling: touch;
-        }
+.arena {
+    position: relative;
+    min-height: 430px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 
-        .repo-card {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+    padding: 25px;
 
-        .repo-card:active {
-            border-color: #58a6ff;
-            transform: scale(0.98);
-        }
+    border-radius: 28px;
+    background:
+        radial-gradient(circle at 50% 45%, rgba(100,100,255,.18), transparent 45%),
+        rgba(255,255,255,.045);
 
-        .repo-card h3 {
-            color: #58a6ff;
-            margin-bottom: 5px;
-            font-size: 18px;
-        }
+    border: 1px solid rgba(255,255,255,.1);
+    box-shadow: inset 0 0 70px rgba(0,0,0,.2);
+}
 
-        .repo-card p {
-            color: #8b949e;
-            font-size: 14px;
-            margin: 3px 0;
-        }
+.title {
+    margin: 0 0 6px;
+    font-size: 30px;
+    font-weight: 900;
+    text-align: center;
+}
 
-        .repo-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
+.subtitle {
+    margin: 0 0 25px;
+    color: #9da5c8;
+    text-align: center;
+}
 
-        .empty-state {
-            text-align: center;
-            padding: 50px 20px;
-            color: #8b949e;
-        }
+/* ORB */
 
-        .empty-state .icon {
-            font-size: 60px;
-            margin-bottom: 20px;
-        }
+.orb {
+    width: 180px;
+    height: 180px;
+    position: relative;
+    display: grid;
+    place-items: center;
 
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            padding: 20px;
-        }
+    border-radius: 50%;
 
-        .modal.show {
-            display: flex;
-        }
+    background:
+        radial-gradient(circle at 35% 30%, white 0%, #a99cff 8%, #6255ff 28%, #201c72 65%, #090a25 100%);
 
-        .modal-content {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 12px;
-            padding: 20px;
-            width: 100%;
-            max-width: 400px;
-        }
+    box-shadow:
+        0 0 25px #7165ff,
+        0 0 70px rgba(113,101,255,.55),
+        inset 0 0 30px rgba(255,255,255,.4);
 
-        .modal-content h2 {
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
+    cursor: pointer;
+    transition: transform .2s;
+}
 
-        input, textarea {
-            width: 100%;
-            background: #0d1117;
-            border: 1px solid #30363d;
-            color: #e6edf3;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            margin-bottom: 12px;
-            font-family: inherit;
-        }
+.orb::before {
+    content: "";
+    position: absolute;
+    inset: -13px;
+    border-radius: 50%;
+    border: 2px solid rgba(160,150,255,.35);
+    animation: rotate 5s linear infinite;
+}
 
-        textarea {
-            min-height: 300px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            line-height: 1.5;
-            resize: vertical;
-        }
+.orb::after {
+    content: "";
+    position: absolute;
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    border: 1px dashed rgba(255,255,255,.12);
+    animation: rotateReverse 9s linear infinite;
+}
 
-        .file-item {
-            background: #0d1117;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            padding: 12px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px;
-            flex-wrap: wrap;
-        }
+.orb:hover {
+    transform: scale(1.04);
+}
 
-        .file-item .file-name {
-            flex: 1;
-            min-width: 100px;
-        }
+.orb:active {
+    transform: scale(.94);
+}
 
-        iframe {
-            width: 100%;
-            height: 500px;
-            background: white;
-            border: none;
-            border-radius: 8px;
-        }
+.orb-icon {
+    font-size: 65px;
+    filter: drop-shadow(0 0 15px white);
+    z-index: 2;
+}
 
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #238636;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 20px;
-            font-size: 14px;
-            display: none;
-            z-index: 200;
-        }
+@keyframes rotate {
+    from { transform: rotate(0); }
+    to { transform: rotate(360deg); }
+}
 
-        .toast.show {
-            display: block;
-            animation: fadeIn 0.3s;
-        }
+@keyframes rotateReverse {
+    from { transform: rotate(360deg); }
+    to { transform: rotate(0); }
+}
 
-        .site-url {
-            background: #0d1117;
-            border: 1px solid #30363d;
-            padding: 8px;
-            border-radius: 6px;
-            font-size: 12px;
-            color: #58a6ff;
-            margin: 5px 0;
-            word-break: break-all;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+.orb.shake {
+    animation: shake .12s infinite;
+}
 
-        .site-url span {
-            flex: 1;
-        }
+@keyframes shake {
+    0% { transform: translate(0,0) scale(1); }
+    25% { transform: translate(5px,-4px) scale(1.03); }
+    50% { transform: translate(-5px,3px) scale(.98); }
+    75% { transform: translate(3px,5px) scale(1.03); }
+    100% { transform: translate(0,0) scale(1); }
+}
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-    </style>
+/* BUTTONS */
+
+.buttons {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    max-width: 550px;
+    margin-top: 35px;
+}
+
+.btn {
+    flex: 1;
+    border: 0;
+    padding: 16px;
+    border-radius: 17px;
+    color: white;
+    font-weight: 900;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn:active {
+    transform: scale(.96);
+}
+
+.summon {
+    background: linear-gradient(135deg,#7165ff,#9a55ff);
+    box-shadow: 0 10px 30px rgba(113,101,255,.35);
+}
+
+.ten {
+    background: linear-gradient(135deg,#ff5964,#ff8a5c);
+    box-shadow: 0 10px 30px rgba(255,89,100,.25);
+}
+
+/* RESULT */
+
+.result {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(2,3,12,.78);
+    backdrop-filter: blur(12px);
+}
+
+.result.show {
+    display: flex;
+}
+
+.result-card {
+    width: min(420px,100%);
+    padding: 30px;
+    text-align: center;
+
+    border-radius: 30px;
+
+    background:
+        linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.035));
+
+    border: 1px solid rgba(255,255,255,.18);
+
+    box-shadow: 0 30px 100px rgba(0,0,0,.5);
+
+    animation: appear .45s cubic-bezier(.2,.9,.2,1);
+}
+
+@keyframes appear {
+    from {
+        opacity: 0;
+        transform: scale(.6) translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.character {
+    font-size: 100px;
+    margin: 15px;
+    filter: drop-shadow(0 0 25px currentColor);
+}
+
+.character-name {
+    font-size: 30px;
+    font-weight: 900;
+}
+
+.rarity {
+    display: inline-block;
+    margin: 10px 0 20px;
+    padding: 7px 15px;
+    border-radius: 20px;
+    font-weight: 900;
+}
+
+.description {
+    color: #aeb5d2;
+    line-height: 1.5;
+    margin-bottom: 22px;
+}
+
+.close {
+    width: 100%;
+    border: 0;
+    padding: 14px;
+    border-radius: 15px;
+    background: white;
+    color: #11152b;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+/* COLLECTION */
+
+.section {
+    margin-top: 18px;
+    padding: 18px;
+
+    border-radius: 24px;
+    background: rgba(255,255,255,.045);
+    border: 1px solid rgba(255,255,255,.08);
+}
+
+.section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.section-title h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.count {
+    color: #8f96b8;
+    font-size: 14px;
+}
+
+.collection {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(115px,1fr));
+    gap: 10px;
+}
+
+.card {
+    position: relative;
+    min-height: 145px;
+    padding: 13px;
+
+    border-radius: 18px;
+
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.08);
+
+    text-align: center;
+    overflow: hidden;
+    transition: .2s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+}
+
+.card.locked {
+    filter: grayscale(1);
+    opacity: .45;
+}
+
+.card-icon {
+    font-size: 48px;
+    margin: 8px;
+}
+
+.card-name {
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.card-rarity {
+    margin-top: 5px;
+    font-size: 11px;
+}
+
+/* STATS */
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 10px;
+}
+
+.stat {
+    padding: 15px;
+    border-radius: 17px;
+    background: rgba(255,255,255,.055);
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 24px;
+    font-weight: 900;
+}
+
+.stat-label {
+    margin-top: 4px;
+    color: #8d95b5;
+    font-size: 12px;
+}
+
+/* CHANCES */
+
+.chances {
+    display: grid;
+    gap: 8px;
+}
+
+.chance {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 13px;
+    border-radius: 12px;
+    background: rgba(255,255,255,.045);
+}
+
+.chance-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+}
+
+.common { color:#b8becb; }
+.rare { color:#4ca5ff; }
+.epic { color:#bd62ff; }
+.legendary { color:#ffc247; }
+.mythic { color:#ff4d76; }
+
+.common .dot { background:#b8becb; }
+.rare .dot { background:#4ca5ff; }
+.epic .dot { background:#bd62ff; }
+.legendary .dot { background:#ffc247; }
+.mythic .dot { background:#ff4d76; }
+
+/* PARTICLES */
+
+.particle {
+    position: fixed;
+    pointer-events: none;
+    z-index: 100;
+
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+
+    animation: particle 1s ease-out forwards;
+}
+
+@keyframes particle {
+    from {
+        opacity: 1;
+        transform: translate(0,0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform:
+            translate(
+                calc((var(--x) - .5) * 500px),
+                calc((var(--y) - .5) * 500px)
+            )
+            scale(0);
+    }
+}
+
+/* MOBILE */
+
+@media(max-width:600px) {
+    .app {
+        padding: 10px;
+    }
+
+    .arena {
+        min-height: 440px;
+        padding: 18px;
+    }
+
+    .title {
+        font-size: 26px;
+    }
+
+    .orb {
+        width: 155px;
+        height: 155px;
+    }
+
+    .orb-icon {
+        font-size: 55px;
+    }
+
+    .buttons {
+        flex-direction: column;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .collection {
+        grid-template-columns: repeat(3,1fr);
+    }
+}
+
+@media(max-width:360px) {
+    .collection {
+        grid-template-columns: repeat(2,1fr);
+    }
+}
+</style>
 </head>
+
 <body>
-    <div class="header">
-        <h1>📦 ChugurHub</h1>
-        <button onclick="showCreateRepo()">+ Новый</button>
-    </div>
 
-    <div class="tabs">
-        <div class="tab active" onclick="switchTab('repos', this)">📁 Репозитории</div>
-        <div class="tab" onclick="switchTab('pages', this)">🌐 Pages</div>
-    </div>
+<div class="app">
 
-    <div class="content" id="content"></div>
-
-    <div class="modal" id="createRepoModal">
-        <div class="modal-content">
-            <h2>Создать репозиторий</h2>
-            <input type="text" id="repoName" placeholder="Название репозитория">
-            <textarea id="repoDesc" placeholder="Описание" rows="3"></textarea>
-            <button onclick="createRepo()">Создать</button>
-            <button class="btn-secondary" onclick="closeModal('createRepoModal')" style="margin-left: 10px;">Отмена</button>
+    <header class="header">
+        <div class="logo">
+            RNG <span>LEGENDS</span>
         </div>
-    </div>
 
-    <div class="modal" id="createFileModal">
-        <div class="modal-content">
-            <h2>Создать файл</h2>
-            <input type="text" id="fileName" placeholder="Название файла (например, index.html)">
-            <button onclick="createFile()">Создать</button>
-            <button class="btn-secondary" onclick="closeModal('createFileModal')" style="margin-left: 10px;">Отмена</button>
+        <div class="money">
+            <div class="coin">★</div>
+            <span id="coins">1000</span>
         </div>
+    </header>
+
+
+    <main class="arena">
+
+        <h1 class="title">⚡ Призови героя</h1>
+        <p class="subtitle">Испытай удачу и собери всех персонажей</p>
+
+        <div class="orb" id="orb" onclick="summon(1)">
+            <div class="orb-icon">❓</div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn summon" onclick="summon(1)">
+                🎲 ПРИЗВАТЬ · 100
+            </button>
+
+            <button class="btn ten" onclick="summon(10)">
+                🔥 ×10 · 900
+            </button>
+        </div>
+
+    </main>
+
+
+    <section class="section">
+
+        <div class="section-title">
+            <h2>📊 Статистика</h2>
+        </div>
+
+        <div class="stats">
+
+            <div class="stat">
+                <div class="stat-number" id="total">0</div>
+                <div class="stat-label">Призывов</div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-number" id="best">—</div>
+                <div class="stat-label">Лучшая редкость</div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-number" id="owned">0/15</div>
+                <div class="stat-label">Персонажей</div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <section class="section">
+
+        <div class="section-title">
+            <h2>🎯 Шансы</h2>
+        </div>
+
+        <div class="chances">
+
+            <div class="chance common">
+                <div class="chance-name">
+                    <span class="dot"></span>
+                    Обычный
+                </div>
+                <b>60%</b>
+            </div>
+
+            <div class="chance rare">
+                <div class="chance-name">
+                    <span class="dot"></span>
+                    Редкий
+                </div>
+                <b>25%</b>
+            </div>
+
+            <div class="chance epic">
+                <div class="chance-name">
+                    <span class="dot"></span>
+                    Эпический
+                </div>
+                <b>10%</b>
+            </div>
+
+            <div class="chance legendary">
+                <div class="chance-name">
+                    <span class="dot"></span>
+                    Легендарный
+                </div>
+                <b>4%</b>
+            </div>
+
+            <div class="chance mythic">
+                <div class="chance-name">
+                    <span class="dot"></span>
+                    Мифический
+                </div>
+                <b>1%</b>
+            </div>
+
+        </div>
+    </section>
+
+
+    <section class="section">
+
+        <div class="section-title">
+            <h2>📖 Коллекция</h2>
+            <span class="count" id="collectionCount">0/15</span>
+        </div>
+
+        <div class="collection" id="collection"></div>
+
+    </section>
+
+</div>
+
+
+<!-- RESULT -->
+
+<div class="result" id="result">
+
+    <div class="result-card">
+
+        <div id="resultIcon" class="character">❓</div>
+
+        <div id="resultName" class="character-name">
+            Герой
+        </div>
+
+        <div id="resultRarity" class="rarity">
+            Редкость
+        </div>
+
+        <div id="resultDescription" class="description">
+            Описание героя
+        </div>
+
+        <button class="close" onclick="closeResult()">
+            ПРОДОЛЖИТЬ
+        </button>
+
     </div>
 
-    <div class="toast" id="toast"></div>
+</div>
 
-    <script>
-        let repos = [];
-        let currentRepo = null;
-        let currentFile = null;
-        let currentTab = 'repos';
 
-        // Загрузка из localStorage
-        function loadData() {
-            const saved = localStorage.getItem('chugurhub_data');
-            if (saved) {
-                try {
-                    repos = JSON.parse(saved);
-                } catch(e) {
-                    repos = [];
-                }
-            }
-            
-            if (repos.length === 0) {
-                const demoRepo = {
-                    id: Date.now(),
-                    name: 'demo-site',
-                    description: 'Демонстрационный сайт',
-                    files: [
-                        {
-                            id: Date.now() + 1,
-                            name: 'index.html',
-                            content: '<!DOCTYPE html>\n<html>\n<head>\n    <title>Мой сайт</title>\n    <style>\n        body {\n            font-family: Arial;\n            text-align: center;\n            padding: 50px;\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n            color: white;\n        }\n        h1 { font-size: 3em; }\n    </style>\n</head>\n<body>\n    <h1>🚀 ChugurHub работает!</h1>\n    <p>Это демонстрационная страница</p>\n</body>\n</html>'
-                        }
-                    ]
-                };
-                repos.push(demoRepo);
-                saveData();
-            }
+<script>
+
+/* =========================
+   ПЕРСОНАЖИ
+========================= */
+
+const characters = [
+
+    {
+        id: 1,
+        name: "Новичок",
+        icon: "🧑",
+        rarity: "Обычный",
+        class: "common",
+        chance: 30,
+        description: "Первый герой каждого путешественника."
+    },
+
+    {
+        id: 2,
+        name: "Лучник",
+        icon: "🏹",
+        rarity: "Обычный",
+        class: "common",
+        chance: 30,
+        description: "Меткий стрелок, который никогда не промахивается."
+    },
+
+    {
+        id: 3,
+        name: "Рыцарь",
+        icon: "🛡️",
+        rarity: "Редкий",
+        class: "rare",
+        chance: 12,
+        description: "Защитник королевства в сияющих доспехах."
+    },
+
+    {
+        id: 4,
+        name: "Маг",
+        icon: "🧙",
+        rarity: "Редкий",
+        class: "rare",
+        chance: 13,
+        description: "Повелитель древней магии."
+    },
+
+    {
+        id: 5,
+        name: "Самурай",
+        icon: "🥷",
+        rarity: "Эпический",
+        class: "epic",
+        chance: 5,
+        description: "Мастер меча, способный победить одним ударом."
+    },
+
+    {
+        id: 6,
+        name: "Вампир",
+        icon: "🧛",
+        rarity: "Эпический",
+        class: "epic",
+        chance: 5,
+        description: "Таинственный бессмертный охотник."
+    },
+
+    {
+        id: 7,
+        name: "Дракон",
+        icon: "🐉",
+        rarity: "Легендарный",
+        class: "legendary",
+        chance: 1.5,
+        description: "Древнее существо, способное уничтожить целую армию."
+    },
+
+    {
+        id: 8,
+        name: "Повелитель",
+        icon: "👑",
+        rarity: "Легендарный",
+        class: "legendary",
+        chance: 1.5,
+        description: "Легендарный правитель потерянного мира."
+    },
+
+    {
+        id: 9,
+        name: "Космический Бог",
+        icon: "🌌",
+        rarity: "Мифический",
+        class: "mythic",
+        chance: 0.5,
+        description: "Существо за пределами пространства и времени."
+    },
+
+    {
+        id: 10,
+        name: "Тёмный Бог",
+        icon: "☠️",
+        rarity: "Мифический",
+        class: "mythic",
+        chance: 0.5,
+        description: "Один из самых редких персонажей вселенной."
+    },
+
+    {
+        id: 11,
+        name: "Пират",
+        icon: "🏴‍☠️",
+        rarity: "Обычный",
+        class: "common",
+        chance: 0
+    },
+
+    {
+        id: 12,
+        name: "Алхимик",
+        icon: "⚗️",
+        rarity: "Редкий",
+        class: "rare",
+        chance: 0
+    },
+
+    {
+        id: 13,
+        name: "Демон",
+        icon: "👹",
+        rarity: "Эпический",
+        class: "epic",
+        chance: 0
+    },
+
+    {
+        id: 14,
+        name: "Феникс",
+        icon: "🔥",
+        rarity: "Легендарный",
+        class: "legendary",
+        chance: 0
+    },
+
+    {
+        id: 15,
+        name: "???",
+        icon: "👁️",
+        rarity: "Мифический",
+        class: "mythic",
+        chance: 0
+    }
+
+];
+
+
+/* =========================
+   СОСТОЯНИЕ
+========================= */
+
+let game = JSON.parse(localStorage.getItem("rngLegends")) || {
+
+    coins: 1000,
+    total: 0,
+    owned: [],
+    best: 0
+
+};
+
+
+/* =========================
+   СОХРАНЕНИЕ
+========================= */
+
+function save() {
+
+    localStorage.setItem(
+        "rngLegends",
+        JSON.stringify(game)
+    );
+
+}
+
+
+/* =========================
+   ОБНОВЛЕНИЕ UI
+========================= */
+
+function updateUI() {
+
+    document.getElementById("coins").textContent =
+        game.coins.toLocaleString();
+
+    document.getElementById("total").textContent =
+        game.total;
+
+    document.getElementById("owned").textContent =
+        `${game.owned.length}/${characters.length}`;
+
+    document.getElementById("collectionCount").textContent =
+        `${game.owned.length}/${characters.length}`;
+
+    let best = ["—","Обычный","Редкий","Эпический","Легендарный","Мифический"];
+
+    document.getElementById("best").textContent =
+        best[game.best];
+
+    renderCollection();
+
+    save();
+
+}
+
+
+/* =========================
+   КОЛЛЕКЦИЯ
+========================= */
+
+function renderCollection() {
+
+    const container =
+        document.getElementById("collection");
+
+    container.innerHTML = "";
+
+    characters.forEach(character => {
+
+        const unlocked =
+            game.owned.includes(character.id);
+
+        const card =
+            document.createElement("div");
+
+        card.className =
+            "card " + (!unlocked ? "locked" : "");
+
+        card.innerHTML = `
+
+            <div class="card-icon">
+                ${unlocked ? character.icon : "❔"}
+            </div>
+
+            <div class="card-name">
+                ${unlocked ? character.name : "Неизвестно"}
+            </div>
+
+            <div class="card-rarity ${character.class}">
+                ${unlocked ? character.rarity : "???"}
+            </div>
+
+        `;
+
+        container.appendChild(card);
+
+    });
+
+}
+
+
+/* =========================
+   RNG
+========================= */
+
+function randomCharacter() {
+
+    const active =
+        characters.filter(c => c.chance > 0);
+
+    const totalChance =
+        active.reduce((sum,c) => sum + c.chance,0);
+
+    let random =
+        Math.random() * totalChance;
+
+    for(const character of active) {
+
+        random -= character.chance;
+
+        if(random <= 0) {
+            return character;
         }
 
-        function saveData() {
-            localStorage.setItem('chugurhub_data', JSON.stringify(repos));
-        }
+    }
 
-        function switchTab(tab, element) {
-            currentTab = tab;
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            element.classList.add('active');
-            
-            if (tab === 'repos') {
-                showReposList();
-            } else {
-                showPagesList();
-            }
-        }
+    return active[active.length - 1];
 
-        function showReposList() {
-            const content = document.getElementById('content');
-            
-            if (repos.length === 0) {
-                content.innerHTML = '<div class="empty-state"><div class="icon">📦</div><h2>Нет репозиториев</h2><p>Создайте свой первый репозиторий!</p></div>';
-                return;
-            }
+}
 
-            let html = '';
-            repos.forEach(repo => {
-                const fileCount = repo.files ? repo.files.length : 0;
-                const hasIndex = repo.files && repo.files.some(f => f.name === 'index.html');
-                
-                html += '<div class="repo-card">';
-                html += '<h3>📁 ' + repo.name + '</h3>';
-                html += '<p>' + (repo.description || 'Нет описания') + ' • ' + fileCount + ' файл(ов)</p>';
-                html += '<div class="repo-actions">';
-                html += '<button onclick="openRepo(' + repo.id + ')">Открыть</button>';
-                if (hasIndex) {
-                    html += '<button class="btn-pages" onclick="openSiteInNewTab(' + repo.id + ')">🌐 Открыть сайт</button>';
-                }
-                html += '</div>';
-                html += '</div>';
-            });
-            
-            content.innerHTML = html;
-        }
 
-        function showPagesList() {
-            const content = document.getElementById('content');
-            
-            const pagesRepos = repos.filter(repo => 
-                repo.files && repo.files.some(f => f.name === 'index.html')
-            );
+/* =========================
+   ПРИЗЫВ
+========================= */
 
-            if (pagesRepos.length === 0) {
-                content.innerHTML = '<div class="empty-state"><div class="icon">🌐</div><h2>Нет страниц</h2><p>Создайте репозиторий с файлом index.html</p></div>';
-                return;
-            }
+function summon(amount) {
 
-            let html = '<p style="margin-bottom: 20px; color: #8b949e;">Ваши сайты (открываются в новой вкладке):</p>';
-            pagesRepos.forEach(repo => {
-                html += '<div class="repo-card">';
-                html += '<h3>🌐 ' + repo.name + '</h3>';
-                html += '<div class="site-url">';
-                html += '<span>chugurhub.' + repo.name + '.app</span>';
-                html += '</div>';
-                html += '<div class="repo-actions">';
-                html += '<button class="btn-preview" onclick="openSiteInNewTab(' + repo.id + ')">↗ Открыть в новой вкладке</button>';
-                html += '</div>';
-                html += '</div>';
-            });
-            
-            content.innerHTML = html;
-        }
+    const price =
+        amount === 10 ? 900 : 100;
 
-        function openSiteInNewTab(id) {
-            const repo = repos.find(r => r.id === id);
-            if (!repo) return;
-            
-            const indexFile = repo.files.find(f => f.name === 'index.html');
-            if (!indexFile) return;
-            
-            // Создаём Blob URL и открываем в новой вкладке
-            const blob = new Blob([indexFile.content], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            
-            // Открываем в новой вкладке
-            const newWindow = window.open(url, '_blank');
-            
-            // Показываем toast с "адресом" сайта
-            showToast('Сайт открыт: chugurhub.' + repo.name + '.app');
-        }
+    if(game.coins < price) {
 
-        function showCreateRepo() {
-            document.getElementById('createRepoModal').classList.add('show');
-            document.getElementById('repoName').value = '';
-            document.getElementById('repoDesc').value = '';
-        }
+        alert("Недостаточно монет!");
 
-        function createRepo() {
-            const name = document.getElementById('repoName').value.trim();
-            const description = document.getElementById('repoDesc').value.trim();
-            
-            if (!name) {
-                showToast('Введите название!');
-                return;
-            }
+        return;
 
-            const repo = {
-                id: Date.now(),
-                name: name,
-                description: description,
-                files: []
-            };
+    }
 
-            repos.push(repo);
-            saveData();
-            closeModal('createRepoModal');
-            showReposList();
-            showToast('Репозиторий создан!');
-        }
+    game.coins -= price;
 
-        function openRepo(id) {
-            currentRepo = repos.find(r => r.id === id);
-            if (!currentRepo) return;
-            
-            const content = document.getElementById('content');
-            
-            let html = '<div style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">';
-            html += '<button class="btn-secondary" onclick="showReposList()">← Назад</button> ';
-            html += '<button onclick="showCreateFile()">+ Файл</button>';
-            
-            const hasIndex = currentRepo.files.some(f => f.name === 'index.html');
-            if (hasIndex) {
-                html += '<button class="btn-pages" onclick="openSiteInNewTab(' + currentRepo.id + ')">🌐 Сайт</button>';
-            }
-            html += '</div>';
-            html += '<h2 style="margin-bottom: 15px;">📁 ' + currentRepo.name + '</h2>';
-            
-            if (currentRepo.files && currentRepo.files.length > 0) {
-                currentRepo.files.forEach(file => {
-                    const icon = getFileIcon(file.name);
-                    html += '<div class="file-item">';
-                    html += '<span>' + icon + '</span>';
-                    html += '<span class="file-name">' + file.name + '</span>';
-                    html += '<button onclick="openFile(' + file.id + ')">Открыть</button>';
-                    html += '<button class="btn-danger" onclick="deleteFile(' + file.id + ')">🗑</button>';
-                    html += '</div>';
-                });
-            } else {
-                html += '<p style="color: #8b949e; text-align: center; padding: 20px;">Нет файлов. Создайте файл index.html чтобы опубликовать сайт!</p>';
-            }
-            
-            content.innerHTML = html;
-        }
+    if(amount === 1) {
 
-        function showCreateFile() {
-            document.getElementById('createFileModal').classList.add('show');
-            document.getElementById('fileName').value = '';
-        }
+        game.total++;
 
-        function createFile() {
-            const name = document.getElementById('fileName').value.trim();
-            
-            if (!name) {
-                showToast('Введите название файла!');
-                return;
-            }
+        const character =
+            randomCharacter();
 
-            const file = {
-                id: Date.now(),
-                name: name,
-                content: name.endsWith('.html') ? '<!DOCTYPE html>\n<html>\n<head>\n    <title>Новая страница</title>\n</head>\n<body>\n    <h1>Привет, ChugurHub!</h1>\n</body>\n</html>' : ''
-            };
+        registerCharacter(character);
 
-            currentRepo.files.push(file);
-            saveData();
-            closeModal('createFileModal');
-            openRepo(currentRepo.id);
-            showToast('Файл создан!');
-        }
-
-        function openFile(id) {
-            currentFile = currentRepo.files.find(f => f.id === id);
-            if (!currentFile) return;
-            
-            const content = document.getElementById('content');
-            
-            let html = '<div style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">';
-            html += '<button class="btn-secondary" onclick="openRepo(' + currentRepo.id + ')">← Назад</button> ';
-            html += '<button onclick="saveFile()">💾 Сохранить</button> ';
-            if (currentFile.name.endsWith('.html')) {
-                html += '<button class="btn-preview" onclick="previewFile()">👁 Предпросмотр</button>';
-                html += '<button class="btn-pages" onclick="openSiteInNewTab(' + currentRepo.id + ')">🌐 Сайт</button>';
-            }
-            html += '</div>';
-            html += '<h3 style="margin-bottom: 10px;">' + getFileIcon(currentFile.name) + ' ' + currentFile.name + '</h3>';
-            html += '<textarea id="fileContent" style="min-height: 400px;">' + escapeHtml(currentFile.content) + '</textarea>';
-            
-            content.innerHTML = html;
-        }
-
-        function saveFile() {
-            const textarea = document.getElementById('fileContent');
-            if (textarea && currentFile) {
-                currentFile.content = textarea.value;
-                saveData();
-                showToast('Сохранено!');
-            }
-        }
-
-        function previewFile() {
-            const textarea = document.getElementById('fileContent');
-            if (textarea) {
-                currentFile.content = textarea.value;
-                saveData();
-                
-                const content = document.getElementById('content');
-                content.innerHTML = '<button class="btn-secondary" onclick="openFile(' + currentFile.id + ')">← Назад</button><br><br>';
-                content.innerHTML += '<iframe srcdoc="' + escapeHtml(currentFile.content) + '"></iframe>';
-            }
-        }
-
-        function deleteFile(id) {
-            if (confirm('Удалить этот файл?')) {
-                currentRepo.files = currentRepo.files.filter(f => f.id !== id);
-                saveData();
-                openRepo(currentRepo.id);
-                showToast('Файл удалён');
-            }
-        }
-
-        function getFileIcon(name) {
-            if (name.endsWith('.html')) return '🌐';
-            if (name.endsWith('.css')) return '🎨';
-            if (name.endsWith('.js')) return '⚡';
-            if (name.endsWith('.json')) return '📋';
-            if (name.endsWith('.md')) return '📝';
-            if (name.endsWith('.py')) return '🐍';
-            return '📄';
-        }
-
-        function escapeHtml(text) {
-            return text
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('show');
-        }
-
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2000);
-        }
-
-        // Закрытие модальных окон при клике вне
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.classList.remove('show');
-                }
-            });
+        animateOrb(() => {
+            showResult(character);
         });
 
-        // Инициализация
-        loadData();
-        showReposList();
-    </script>
+    } else {
+
+        let results = [];
+
+        for(let i=0;i<10;i++) {
+
+            game.total++;
+
+            const character =
+                randomCharacter();
+
+            registerCharacter(character);
+
+            results.push(character);
+
+        }
+
+        const best =
+            getBestCharacter(results);
+
+        animateOrb(() => {
+            showResult(best, true, results);
+        });
+
+    }
+
+    updateUI();
+
+}
+
+
+/* =========================
+   РЕГИСТРАЦИЯ
+========================= */
+
+function registerCharacter(character) {
+
+    if(!game.owned.includes(character.id)) {
+
+        game.owned.push(character.id);
+
+    }
+
+    const rank =
+        getRank(character.rarity);
+
+    if(rank > game.best) {
+
+        game.best = rank;
+
+    }
+
+}
+
+
+/* =========================
+   РАНГ РЕДКОСТИ
+========================= */
+
+function getRank(rarity) {
+
+    if(rarity === "Обычный") return 1;
+    if(rarity === "Редкий") return 2;
+    if(rarity === "Эпический") return 3;
+    if(rarity === "Легендарный") return 4;
+    if(rarity === "Мифический") return 5;
+
+    return 0;
+
+}
+
+
+/* =========================
+   ЛУЧШИЙ
+========================= */
+
+function getBestCharacter(list) {
+
+    return list.reduce(
+        (best,current) => {
+
+            return getRank(current.rarity) >
+                   getRank(best.rarity)
+                ? current
+                : best;
+
+        }
+    );
+
+}
+
+
+/* =========================
+   АНИМАЦИЯ
+========================= */
+
+function animateOrb(callback) {
+
+    const orb =
+        document.getElementById("orb");
+
+    orb.classList.add("shake");
+
+    createParticles();
+
+    setTimeout(() => {
+
+        orb.classList.remove("shake");
+
+        callback();
+
+    },900);
+
+}
+
+
+/* =========================
+   РЕЗУЛЬТАТ
+========================= */
+
+function showResult(character, multiple=false, results=[]) {
+
+    document.getElementById("resultIcon")
+        .textContent = character.icon;
+
+    document.getElementById("resultName")
+        .textContent =
+        multiple
+        ? `Лучший из 10: ${character.name}`
+        : character.name;
+
+    const rarity =
+        document.getElementById("resultRarity");
+
+    rarity.textContent =
+        character.rarity;
+
+    rarity.className =
+        "rarity " + character.class;
+
+    document.getElementById("resultDescription")
+        .textContent =
+        multiple
+        ? `Ты получил 10 персонажей! Лучший результат — ${character.rarity}.`
+        : character.description;
+
+    document.getElementById("result")
+        .classList.add("show");
+
+}
+
+
+/* =========================
+   ЗАКРЫТЬ
+========================= */
+
+function closeResult() {
+
+    document.getElementById("result")
+        .classList.remove("show");
+
+    updateUI();
+
+}
+
+
+/* =========================
+   ЧАСТИЦЫ
+========================= */
+
+function createParticles() {
+
+    for(let i=0;i<45;i++) {
+
+        const particle =
+            document.createElement("div");
+
+        particle.className =
+            "particle";
+
+        particle.style.left =
+            "50%";
+
+        particle.style.top =
+            "50%";
+
+        particle.style.setProperty(
+            "--x",
+            Math.random()
+        );
+
+        particle.style.setProperty(
+            "--y",
+            Math.random()
+        );
+
+        particle.style.animationDelay =
+            Math.random() * .2 + "s";
+
+        document.body.appendChild(particle);
+
+        setTimeout(() => {
+            particle.remove();
+        },1200);
+
+    }
+
+}
+
+
+/* =========================
+   ЗАПУСК
+========================= */
+
+updateUI();
+
+</script>
+
 </body>
-                                                                                                                       </html>
+                        </html>
