@@ -1,2705 +1,710 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width,
-initial-scale=1,
-maximum-scale=1,
-user-scalable=no,
-viewport-fit=cover">
-
-<title>3D World</title>
-
-<style>
-
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-    user-select:none;
-    -webkit-user-select:none;
-    -webkit-tap-highlight-color:transparent;
-    touch-action:none;
-}
-
-html,body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#73c9ff;
-    font-family:Arial,sans-serif;
-}
-
-#game{
-    position:fixed;
-    inset:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-}
-
-canvas{
-    display:block;
-    width:100%;
-    height:100%;
-    touch-action:none;
-}
-
-
-/* START */
-
-#startScreen{
-    position:absolute;
-    inset:0;
-    z-index:1000;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    color:white;
-
-    background:
-        radial-gradient(
-            circle at center,
-            #75cfff 0%,
-            #3d9ed4 45%,
-            #2273a6 100%
-        );
-}
-
-#startScreen h1{
-    margin-bottom:8px;
-    font-size:30px;
-    letter-spacing:3px;
-    font-weight:900;
-}
-
-#startScreen p{
-    margin-bottom:25px;
-    color:#e8f7ff;
-    font-size:14px;
-}
-
-#startButton{
-    border:none;
-    border-radius:15px;
-    padding:16px 34px;
-    background:white;
-    color:#111;
-    font-size:17px;
-    font-weight:900;
-    box-shadow:0 8px 30px rgba(0,0,0,.3);
-}
-
-#startButton:active{
-    transform:scale(.95);
-}
-
-
-/* LOADING */
-
-#loading{
-    position:absolute;
-    inset:0;
-    z-index:900;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:white;
-    background:#73c9ff;
-    font-size:17px;
-}
-
-
-/* HELP */
-
-#help{
-    position:absolute;
-
-    top:max(15px,env(safe-area-inset-top));
-    right:max(15px,env(safe-area-inset-right));
-
-    z-index:100;
-
-    max-width:270px;
-    padding:12px 16px;
-
-    border-radius:13px;
-
-    color:white;
-    background:rgba(0,0,0,.48);
-
-    border:1px solid rgba(255,255,255,.12);
-
-    backdrop-filter:blur(10px);
-
-    font-size:13px;
-    line-height:1.4;
-
-    opacity:0;
-    transform:translateX(130%);
-
-    pointer-events:none;
-}
-
-#help.show{
-    animation:
-        helpIn .65s ease forwards,
-        helpOut .65s ease 4.35s forwards;
-}
-
-@keyframes helpIn{
-    from{
-        opacity:0;
-        transform:translateX(130%);
-    }
-    to{
-        opacity:1;
-        transform:translateX(0);
-    }
-}
-
-@keyframes helpOut{
-    from{
-        opacity:1;
-        transform:translateX(0);
-    }
-    to{
-        opacity:0;
-        transform:translateX(130%);
-    }
-}
-
-
-/* JOYSTICK */
-
-#joystick{
-    position:fixed;
-    left:0;
-    top:0;
-
-    width:120px;
-    height:120px;
-
-    z-index:50;
-
-    border-radius:50%;
-
-    background:rgba(0,0,0,.16);
-    border:1px solid rgba(255,255,255,.08);
-
-    box-shadow:inset 0 0 20px rgba(0,0,0,.10);
-
-    pointer-events:none;
-
-    opacity:0;
-
-    transform:translate(-50%,-50%);
-
-    transition:opacity .08s ease;
-}
-
-#joystick.active{
-    opacity:1;
-}
-
-#stick{
-    position:absolute;
-
-    left:50%;
-    top:50%;
-
-    width:50px;
-    height:50px;
-
-    margin-left:-25px;
-    margin-top:-25px;
-
-    border-radius:50%;
-
-    background:rgba(0,0,0,.58);
-
-    border:1px solid rgba(255,255,255,.13);
-
-    box-shadow:0 3px 12px rgba(0,0,0,.30);
-
-    pointer-events:none;
-
-    transform:translate3d(0,0,0);
-}
-
-
-/* JUMP */
-
-#jump{
-    position:fixed;
-
-    right:max(30px,env(safe-area-inset-right));
-    bottom:max(35px,env(safe-area-inset-bottom));
-
-    width:82px;
-    height:82px;
-
-    z-index:50;
-
-    border-radius:50%;
-
-    border:2px solid rgba(255,255,255,.20);
-
-    background:rgba(255,255,255,.08);
-
-    color:white;
-
-    font-size:32px;
-    font-weight:900;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    padding:0;
-
-    box-shadow:
-        0 7px 25px rgba(0,0,0,.3),
-        inset 0 0 15px rgba(255,255,255,.04);
-}
-
-#jump:active{
-    transform:scale(.90);
-    background:rgba(255,255,255,.18);
-}
-
-
-/* LANDSCAPE */
-
-#landscape{
-    position:absolute;
-    inset:0;
-
-    z-index:2000;
-
-    display:none;
-
-    align-items:center;
-    justify-content:center;
-
-    flex-direction:column;
-
-    color:white;
-
-    background:#111;
-
-    text-align:center;
-}
-
-.rotateIcon{
-    font-size:60px;
-    margin-bottom:15px;
-}
-
-@media(
-    orientation:portrait
-) and (max-width:700px){
-
-    #landscape{
-        display:flex;
-    }
-}
-
-.hidden{
-    display:none!important;
-}
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ChugurHub</title>
+    
+    <!-- PWA мета-теги -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="ChugurHub">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0d1117">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .header {
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            flex: 1;
+            color: #58a6ff;
+            font-weight: bold;
+        }
+
+        button {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            touch-action: manipulation;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .btn-secondary {
+            background: #21262d;
+            border: 1px solid #30363d;
+        }
+
+        .btn-danger {
+            background: #da3633;
+        }
+
+        .btn-preview {
+            background: #58a6ff;
+            color: #000;
+        }
+
+        .btn-pages {
+            background: #a371f7;
+            color: white;
+        }
+
+        .btn-create-page {
+            background: #f0883e;
+            color: white;
+        }
+
+        .tabs {
+            display: flex;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            flex-shrink: 0;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 15px;
+            color: #8b949e;
+            border-bottom: 2px solid transparent;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        .tab.active {
+            color: #e6edf3;
+            border-bottom-color: #58a6ff;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .repo-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .repo-card:active {
+            border-color: #58a6ff;
+            transform: scale(0.98);
+        }
+
+        .repo-card h3 {
+            color: #58a6ff;
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+
+        .repo-card p {
+            color: #8b949e;
+            font-size: 14px;
+            margin: 3px 0;
+        }
+
+        .repo-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #8b949e;
+        }
+
+        .empty-state .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        input, textarea {
+            width: 100%;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: #e6edf3;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 12px;
+            font-family: inherit;
+        }
+
+        textarea {
+            min-height: 300px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            resize: vertical;
+        }
+
+        .file-item {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            flex-wrap: wrap;
+        }
+
+        .file-item .file-name {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 500px;
+            background: white;
+            border: none;
+            border-radius: 8px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #238636;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: none;
+            z-index: 200;
+        }
+
+        .toast.show {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        .site-url {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #58a6ff;
+            margin: 5px 0;
+            word-break: break-all;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .site-url span {
+            flex: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+    </style>
 </head>
-
 <body>
-
-<div id="game">
-
-<div id="loading">
-    Создание 3D мира...
-</div>
-
-<div id="landscape">
-    <div class="rotateIcon">📱↔️</div>
-    <div>Поверни телефон горизонтально</div>
-</div>
-
-<div id="startScreen">
-
-    <h1>3D WORLD</h1>
-
-    <p>
-        Большой зелёный мир
-    </p>
-
-    <button id="startButton">
-        ▶ НАЧАТЬ ИГРУ
-    </button>
-
-</div>
-
-<div id="help">
-
-    🕹️ <b>Управление</b><br>
-
-    Левая половина — движение<br>
-
-    Правая половина — камера<br>
-
-    ⬆ — прыжок
-
-</div>
-
-<button id="jump">
-    ⬆
-</button>
-
-<div id="joystick">
-    <div id="stick"></div>
-</div>
-
-</div>
-
-
-<script type="module">
-
-import * as THREE from
-'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
-
-
-/* =====================================================
-   VARIABLES
-===================================================== */
-
-let scene;
-let camera;
-let renderer;
-
-let player;
-
-let parts={};
-
-let clock;
-
-let velocityY=0;
-
-let grounded=true;
-
-let gameStarted=false;
-
-let joystickX=0;
-let joystickY=0;
-
-let moving=false;
-
-
-/* CAMERA */
-
-let cameraYaw=0;
-
-let targetCameraYaw=0;
-
-let cameraPitch=.25;
-
-let targetCameraPitch=.25;
-
-
-/* =====================================================
-   SETTINGS
-===================================================== */
-
-/* скорость увеличена */
-
-const SPEED=6.2;
-
-
-/* прыжок увеличен */
-
-const JUMP=9.5;
-
-
-const GRAVITY=22;
-
-
-/* персонаж */
-
-const PLAYER_SCALE=.46;
-
-
-/* положение игрока */
-
-const GROUND_Y=.62;
-
-
-/* =====================================================
-   SPAWN
-===================================================== */
-
-const spawnPoint=
-    new THREE.Vector3(
-        0,
-        GROUND_Y,
-        0
-    );
-
-
-/* =====================================================
-   DEATH ZONE
-===================================================== */
-
-/*
-    Она невидимая.
-
-    Через 5 секунд после запуска
-    становится активной.
-*/
-
-let deathZoneActive=false;
-
-const deathZoneY=-5;
-
-
-/* =====================================================
-   MATERIALS
-===================================================== */
-
-const mat={};
-
-mat.skin=
-new THREE.MeshStandardMaterial({
-    color:0xb8b8b8,
-    roughness:.78
-});
-
-mat.black=
-new THREE.MeshStandardMaterial({
-    color:0x080a0a,
-    roughness:.58
-});
-
-mat.jacket=
-new THREE.MeshStandardMaterial({
-    color:0x101515,
-    roughness:.74
-});
-
-mat.blue=
-new THREE.MeshStandardMaterial({
-    color:0x246d95,
-    roughness:.68
-});
-
-mat.jeans=
-new THREE.MeshStandardMaterial({
-    color:0x182a31,
-    roughness:.88
-});
-
-mat.shoe=
-new THREE.MeshStandardMaterial({
-    color:0x51352d,
-    roughness:.82
-});
-
-mat.sole=
-new THREE.MeshStandardMaterial({
-    color:0xb7b7b7,
-    roughness:.72
-});
-
-mat.white=
-new THREE.MeshStandardMaterial({
-    color:0xdddddd,
-    roughness:.68
-});
-
-mat.metal=
-new THREE.MeshStandardMaterial({
-    color:0x888888,
-    metalness:.65,
-    roughness:.35
-});
-
-
-/* =====================================================
-   INIT
-===================================================== */
-
-function init(){
-
-    scene=
-        new THREE.Scene();
-
-
-    /*
-        Голубое небо
-    */
-
-    scene.background=
-        new THREE.Color(
-            0x73c9ff
-        );
-
-
-    camera=
-        new THREE.PerspectiveCamera(
-
-            65,
-
-            innerWidth/innerHeight,
-
-            .05,
-
-            500
-
-        );
-
-
-    renderer=
-        new THREE.WebGLRenderer({
-
-            antialias:true,
-
-            powerPreference:
-                "high-performance"
-
-        });
-
-
-    renderer.setPixelRatio(
-        Math.min(
-            window.devicePixelRatio,
-            1.35
-        )
-    );
-
-
-    renderer.setSize(
-        innerWidth,
-        innerHeight,
-        false
-    );
-
-
-    renderer.shadowMap.enabled=true;
-
-    renderer.shadowMap.type=
-        THREE.PCFShadowMap;
-
-
-    renderer.outputColorSpace=
-        THREE.SRGBColorSpace;
-
-
-    renderer.toneMapping=
-        THREE.ACESFilmicToneMapping;
-
-
-    renderer.toneMappingExposure=
-        1.1;
-
-
-    document
-        .getElementById("game")
-        .appendChild(
-            renderer.domElement
-        );
-
-
-    /* =================================================
-       LIGHT
-    ================================================= */
-
-    const hemi=
-        new THREE.HemisphereLight(
-            0xbde9ff,
-            0x4c7740,
-            2.0
-        );
-
-    scene.add(hemi);
-
-
-    const mainLight=
-        new THREE.DirectionalLight(
-            0xffffff,
-            2.5
-        );
-
-
-    mainLight.position.set(
-        -20,
-        25,
-        15
-    );
-
-
-    mainLight.castShadow=true;
-
-
-    mainLight.shadow.mapSize.width=
-        1024;
-
-    mainLight.shadow.mapSize.height=
-        1024;
-
-
-    mainLight.shadow.camera.left=-50;
-    mainLight.shadow.camera.right=50;
-    mainLight.shadow.camera.top=50;
-    mainLight.shadow.camera.bottom=-50;
-
-
-    scene.add(mainLight);
-
-
-    createWorld();
-
-    createPlayer();
-
-    createDecorations();
-
-    createClouds();
-
-
-    camera.position.set(
-        0,
-        4.4,
-        7.5
-    );
-
-
-    addEventListener(
-        "resize",
-        resize
-    );
-
-
-    setupJoystick();
-
-    setupJump();
-
-    setupKeyboard();
-
-    setupCamera();
-
-
-    document
-        .getElementById("loading")
-        .classList.add("hidden");
-
-
-    clock=
-        new THREE.Clock();
-
-
-    animate();
-
-}
-
-
-/* =====================================================
-   WORLD
-===================================================== */
-
-function createWorld(){
-
-    /*
-        ОЧЕНЬ БОЛЬШОЕ ЗЕЛЁНОЕ ПОЛЕ
-    */
-
-    const fieldSize=180;
-
-
-    const grass=
-        new THREE.Mesh(
-
-            new THREE.PlaneGeometry(
-                fieldSize,
-                fieldSize
-            ),
-
-            new THREE.MeshStandardMaterial({
-
-                color:0x4caf50,
-
-                roughness:1
-
-            })
-
-        );
-
-
-    grass.rotation.x=
-        -Math.PI/2;
-
-
-    grass.position.y=0;
-
-    grass.receiveShadow=true;
-
-    scene.add(grass);
-
-
-    /*
-        Небольшая сетка не нужна —
-        поле теперь выглядит как земля.
-    */
-
-
-    /* =================================================
-       SPAWN PLATFORM
-    ================================================= */
-
-    const platform=
-        new THREE.Mesh(
-
-            new THREE.BoxGeometry(
-                4,
-                .35,
-                4
-            ),
-
-            new THREE.MeshStandardMaterial({
-
-                color:0xffd21f,
-
-                roughness:.65
-
-            })
-
-        );
-
-
-    platform.position.set(
-        spawnPoint.x,
-        .17,
-        spawnPoint.z
-    );
-
-
-    platform.castShadow=true;
-
-    platform.receiveShadow=true;
-
-    scene.add(platform);
-
-
-    /*
-        Невидимая зона смерти.
-
-        Она не показывается.
-        Просто проверяем высоту игрока.
-    */
-
-    setTimeout(()=>{
-
-        deathZoneActive=true;
-
-    },5000);
-
-}
-
-
-/* =====================================================
-   PLAYER
-===================================================== */
-
-function createPlayer(){
-
-    player=
-        new THREE.Group();
-
-
-    player.position.copy(
-        spawnPoint
-    );
-
-
-    player.scale.setScalar(
-        PLAYER_SCALE
-    );
-
-
-    scene.add(player);
-
-
-    const body=
-        new THREE.Group();
-
-
-    body.position.y=3.25;
-
-    player.add(body);
-
-    parts.body=body;
-
-
-    /* TORSO */
-
-    const torso=
-        new THREE.Mesh(
-
-            new THREE.BoxGeometry(
-                2.45,
-                2.45,
-                1.35
-            ),
-
-            mat.jacket
-
-        );
-
-
-    torso.castShadow=true;
-
-    torso.receiveShadow=true;
-
-    body.add(torso);
-
-
-    /* ZIPPER */
-
-    const zipper=
-        new THREE.Mesh(
-
-            new THREE.BoxGeometry(
-                .055,
-                2.15,
-                1.38
-            ),
-
-            mat.metal
-
-        );
-
-
-    zipper.position.z=.7;
-
-    body.add(zipper);
-
-
-    /* NECK */
-
-    const neck=
-        new THREE.Mesh(
-
-            new THREE.BoxGeometry(
-                .7,
-                .5,
-                .7
-            ),
-
-            mat.blue
-
-        );
-
-
-    neck.position.y=1.45;
-
-    body.add(neck);
-
-
-    /* HEAD */
-
-    const head=
-        new THREE.Mesh(
-
-            new THREE.BoxGeometry(
-                2.05,
-                1.9,
-                1.8
-            ),
-
-            mat.skin
-
-        );
-
-
-    head.position.y=2.7;
-
-    head.castShadow=true;
-
-    body.add(head);
-
-    parts.head=head;
-
-
-    createEye(
-        head,
-        -.48,
-        2.78,
-        .91
-    );
-
-
-    createEye(
-        head,
-        .48,
-        2.78,
-        .91
-    );
-
-
-    const smile=
-        createSmile();
-
-
-    smile.position.set(
-        0,
-        2.42,
-        .92
-    );
-
-
-    body.add(smile);
-
-
-    /* CAP */
-
-    const cap=
-        new THREE.Mesh(
-
-            new THREE.SphereGeometry(
-                1.18,
-                20,
-                12,
-                0,
-                Math.PI*2,
-                0,
-                Math.PI/2
-            ),
-
-            mat.black
-
-        );
-
-
-    cap.scale.y=.48;
-
-    cap.position.y=3.72;
-
-    body.add(cap);
-
-
-    const brim=
-        new THREE.Mesh(
-
-            new THREE.BoxGeometry(
-                1.5,
-                .18,
-                .9
-            ),
-
-            mat.black
-
-        );
-
-
-    brim.position.set(
-        0,
-        3.55,
-        .7
-    );
-
-
-    brim.rotation.x=-.12;
-
-    body.add(brim);
-
-
-    /* ARMS */
-
-    createArm(
-        "left",
-        -1.65
-    );
-
-    createArm(
-        "right",
-        1.65
-    );
-
-
-    /* LEGS */
-
-    createLeg(
-        "left",
-        -.65
-    );
-
-    createLeg(
-        "right",
-        .65
-    );
-
-}
-
-
-/* =====================================================
-   ARM
-===================================================== */
-
-function createArm(
-    side,
-    x
-){
-
-    const arm=
-        new THREE.Group();
-
-
-    arm.position.set(
-        x,
-        3.75,
-        0
-    );
-
-
-    player.add(arm);
-
-
-    const upper=
-        new THREE.Mesh(
-
-            new THREE.BoxGeometry(
-                .72,
-                1.55,
-                .78
-            ),
-
-            mat.jacket
-
-        );
-
-
-    upper.position.y=-.75;
-
-    upper.castShadow=true;
-
-    arm.add(upper);
-
-
-    const cuff=
-        new THREE.Mesh(
-
-            new THREE.BoxGeometry(
-                .74,
-                .18,
-                .8
-            ),
-
-            mat.metal
-
-        );
-
-
-    cuff.position.y=-1.48;
-
-    arm.add(cuff);
-
-
-    const hand=
-        new THREE.Mesh(
-
-            new THREE.BoxGeometry(
-                .78,
-                .8,
-                .82
-            ),
-
-            mat.skin
-
-        );
-
-
-    hand.position.y=-1.93;
-
-    hand.castShadow=true;
-
-    arm.add(hand);
-
-
-    parts[
-        side+"Arm"
-    ]=arm;
-
-}
-
-
-/* =====================================================
-   LEG
-===================================================== */
-
-function createLeg(
-    side,
-    x
-){
-
-    const leg=
-        new THREE.Group();
-
-
-    leg.position.set(
-        x,
-        2,
-        0
-    );
-
-
-    player.add(leg);
-
-
-    const pants=
-        new THREE.Mesh(
-
-            new THREE.BoxGeometry(
-                .95,
-                2.2,
-                1
-            ),
-
-            mat.jeans
-
-        );
-
-
-    pants.position.y=-1.1;
-
-    pants.castShadow=true;
-
-    leg.add(pants);
-
-
-    const shoe=
-        new THREE.Mesh(
-
-            new THREE.BoxGeometry(
-                1.2,
-                .55,
-                1.7
-            ),
-
-            mat.shoe
-
-        );
-
-
-    shoe.position.set(
-        0,
-        -2.47,
-        .25
-    );
-
-
-    shoe.castShadow=true;
-
-    leg.add(shoe);
-
-
-    const sole=
-        new THREE.Mesh(
-
-            new THREE.BoxGeometry(
-                1.28,
-                .18,
-                1.78
-            ),
-
-            mat.sole
-
-        );
-
-
-    sole.position.set(
-        0,
-        -2.78,
-        .25
-    );
-
-
-    leg.add(sole);
-
-
-    parts[
-        side+"Leg"
-    ]=leg;
-
-}
-
-
-/* =====================================================
-   EYE
-===================================================== */
-
-function createEye(
-    head,
-    x,
-    y,
-    z
-){
-
-    const eye=
-        new THREE.Mesh(
-
-            new THREE.SphereGeometry(
-                .12,
-                10,
-                8
-            ),
-
-            mat.black
-
-        );
-
-
-    eye.position.set(
-        x,
-        y-2.7,
-        z
-    );
-
-
-    head.add(eye);
-
-}
-
-
-/* =====================================================
-   SMILE
-===================================================== */
-
-function createSmile(){
-
-    const curve=
-        new THREE.EllipseCurve(
-            0,
-            0,
-            .45,
-            .3,
-            Math.PI*.15,
-            Math.PI*.85,
-            false,
-            0
-        );
-
-
-    const points=
-        curve.getPoints(20);
-
-
-    const geometry=
-        new THREE.BufferGeometry()
-            .setFromPoints(points);
-
-
-    return new THREE.Line(
-        geometry,
-        new THREE.LineBasicMaterial({
-            color:0x111111
-        })
-    );
-
-}
-
-
-/* =====================================================
-   DECORATIONS
-===================================================== */
-
-function createDecorations(){
-
-    /*
-        ТРИ ФИЗИЧЕСКИХ КУБА.
-
-        Они стоят на поле.
-        На них можно запрыгивать.
-    */
-
-    createPhysicalCube(
-        -8,
-        1.5,
-        -5,
-        3,
-        3,
-        3,
-        0x555b60
-    );
-
-
-    createPhysicalCube(
-        8,
-        2,
-        -8,
-        4,
-        4,
-        4,
-        0x555b60
-    );
-
-
-    createPhysicalCube(
-        -8,
-        1,
-        7,
-        2,
-        2,
-        2,
-        0x31556d
-    );
-
-}
-
-
-/* =====================================================
-   PHYSICAL CUBE
-===================================================== */
-
-const physicalObjects=[];
-
-
-function createPhysicalCube(
-    x,
-    y,
-    z,
-    sx,
-    sy,
-    sz,
-    color
-){
-
-    const cube=
-        new THREE.Mesh(
-
-            new THREE.BoxGeometry(
-                sx,
-                sy,
-                sz
-            ),
-
-            new THREE.MeshStandardMaterial({
-
-                color:color,
-
-                roughness:.8
-
-            })
-
-        );
-
-
-    cube.position.set(
-        x,
-        y,
-        z
-    );
-
-
-    cube.castShadow=true;
-
-    cube.receiveShadow=true;
-
-
-    scene.add(cube);
-
-
-    physicalObjects.push({
-
-        mesh:cube,
-
-        width:sx,
-
-        height:sy,
-
-        depth:sz
-
-    });
-
-}
-
-
-/* =====================================================
-   CLOUDS
-===================================================== */
-
-function createClouds(){
-
-    const cloudMaterial=
-        new THREE.MeshStandardMaterial({
-
-            color:0xffffff,
-
-            roughness:1
-
-        });
-
-
-    function cloud(
-        x,
-        y,
-        z,
-        scale
-    ){
-
-        const group=
-            new THREE.Group();
-
-
-        group.position.set(
-            x,
-            y,
-            z
-        );
-
-
-        group.scale.setScalar(
-            scale
-        );
-
-
-        const parts=[
-            [-2,0,0,2.2],
-            [0,0.4,0,2.8],
-            [2,0,0,2],
-            [.7,.8,0,1.8]
-        ];
-
-
-        for(
-            const p of parts
-        ){
-
-            const c=
-                new THREE.Mesh(
-
-                    new THREE.SphereGeometry(
-                        p[3],
-                        16,
-                        12
-                    ),
-
-                    cloudMaterial
-
-                );
-
-
-            c.position.set(
-                p[0],
-                p[1],
-                p[2]
-            );
-
-
-            group.add(c);
-
+    <div class="header">
+        <h1>📦 ChugurHub</h1>
+        <button onclick="showCreateRepo()">+ Новый</button>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('repos', this)">📁 Репозитории</div>
+        <div class="tab" onclick="switchTab('pages', this)">🌐 Pages</div>
+    </div>
+
+    <div class="content" id="content"></div>
+
+    <div class="modal" id="createRepoModal">
+        <div class="modal-content">
+            <h2>Создать репозиторий</h2>
+            <input type="text" id="repoName" placeholder="Название репозитория">
+            <textarea id="repoDesc" placeholder="Описание" rows="3"></textarea>
+            <button onclick="createRepo()">Создать</button>
+            <button class="btn-secondary" onclick="closeModal('createRepoModal')" style="margin-left: 10px;">Отмена</button>
+        </div>
+    </div>
+
+    <div class="modal" id="createFileModal">
+        <div class="modal-content">
+            <h2>Создать файл</h2>
+            <input type="text" id="fileName" placeholder="Название файла (например, index.html)">
+            <button onclick="createFile()">Создать</button>
+            <button class="btn-secondary" onclick="closeModal('createFileModal')" style="margin-left: 10px;">Отмена</button>
+        </div>
+    </div>
+
+    <div class="modal" id="createPageModal">
+        <div class="modal-content">
+            <h2>Создать страницу Pages</h2>
+            <input type="text" id="pageName" placeholder="Название страницы (для адреса)">
+            <button onclick="createPage()">Создать</button>
+            <button class="btn-secondary" onclick="closeModal('createPageModal')" style="margin-left: 10px;">Отмена</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let repos = [];
+        let currentRepo = null;
+        let currentFile = null;
+        let currentTab = 'repos';
+
+        // Загрузка из localStorage
+        function loadData() {
+            const saved = localStorage.getItem('chugurhub_data');
+            if (saved) {
+                try {
+                    repos = JSON.parse(saved);
+                } catch(e) {
+                    repos = [];
+                }
+            }
+            
+            if (repos.length === 0) {
+                const demoRepo = {
+                    id: Date.now(),
+                    name: 'demo-site',
+                    description: 'Демонстрационный сайт',
+                    files: [
+                        {
+                            id: Date.now() + 1,
+                            name: 'index.html',
+                            content: '<!DOCTYPE html>\n<html>\n<head>\n    <title>Мой сайт</title>\n    <style>\n        body {\n            font-family: Arial;\n            text-align: center;\n            padding: 50px;\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n            color: white;\n        }\n        h1 { font-size: 3em; }\n    </style>\n</head>\n<body>\n    <h1>🚀 ChugurHub работает!</h1>\n    <p>Это демонстрационная страница</p>\n</body>\n</html>'
+                        }
+                    ]
+                };
+                repos.push(demoRepo);
+                saveData();
+            }
         }
 
-
-        scene.add(group);
-
-    }
-
-
-    cloud(
-        -25,
-        20,
-        -35,
-        1.2
-    );
-
-
-    cloud(
-        25,
-        23,
-        -50,
-        1.5
-    );
-
-
-    cloud(
-        0,
-        18,
-        -70,
-        1.1
-    );
-
-
-    cloud(
-        45,
-        20,
-        10,
-        1.3
-    );
-
-}
-
-
-/* =====================================================
-   JOYSTICK
-===================================================== */
-
-function setupJoystick(){
-
-    const joy=
-        document.getElementById(
-            "joystick"
-        );
-
-
-    const stick=
-        document.getElementById(
-            "stick"
-        );
-
-
-    let active=false;
-
-    let pointerId=null;
-
-    let centerX=0;
-
-    let centerY=0;
-
-
-    const max=38;
-
-
-    function update(
-        clientX,
-        clientY
-    ){
-
-        let dx=
-            clientX-centerX;
-
-        let dy=
-            clientY-centerY;
-
-
-        const distance=
-            Math.sqrt(
-                dx*dx+
-                dy*dy
-            );
-
-
-        if(distance>max){
-
-            dx=
-                dx/distance*max;
-
-            dy=
-                dy/distance*max;
-
+        function saveData() {
+            localStorage.setItem('chugurhub_data', JSON.stringify(repos));
         }
 
+        function switchTab(tab, element) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            element.classList.add('active');
+            
+            if (tab === 'repos') {
+                showReposList();
+            } else {
+                showPagesList();
+            }
+        }
 
-        stick.style.transform=
-            `translate3d(${dx}px,${dy}px,0)`;
-
-
-        joystickX=
-            dx/max;
-
-
-        joystickY=
-            dy/max;
-
-    }
-
-
-    renderer.domElement.addEventListener(
-        "pointerdown",
-        e=>{
-
-            if(
-                e.clientX>
-                innerWidth*.5
-            )
+        function showReposList() {
+            const content = document.getElementById('content');
+            
+            if (repos.length === 0) {
+                content.innerHTML = '<div class="empty-state"><div class="icon">📦</div><h2>Нет репозиториев</h2><p>Создайте свой первый репозиторий!</p></div>';
                 return;
-
-
-            e.preventDefault();
-
-
-            active=true;
-
-            pointerId=
-                e.pointerId;
-
-
-            centerX=e.clientX;
-            centerY=e.clientY;
-
-
-            joy.style.left=
-                centerX+"px";
-
-
-            joy.style.top=
-                centerY+"px";
-
-
-            joy.classList.add("active");
-
-
-            renderer.domElement
-                .setPointerCapture(
-                    pointerId
-                );
-
-
-            update(
-                e.clientX,
-                e.clientY
-            );
-
-        }
-    );
-
-
-    renderer.domElement.addEventListener(
-        "pointermove",
-        e=>{
-
-            if(
-                !active ||
-                e.pointerId!==pointerId
-            )
-                return;
-
-
-            update(
-                e.clientX,
-                e.clientY
-            );
-
-        }
-    );
-
-
-    function end(e){
-
-        if(
-            e.pointerId!==pointerId
-        )
-            return;
-
-
-        active=false;
-
-        pointerId=null;
-
-        joystickX=0;
-        joystickY=0;
-
-
-        stick.style.transform=
-            "translate3d(0,0,0)";
-
-
-        joy.classList.remove("active");
-
-    }
-
-
-    renderer.domElement.addEventListener(
-        "pointerup",
-        end
-    );
-
-
-    renderer.domElement.addEventListener(
-        "pointercancel",
-        end
-    );
-
-}
-
-
-/* =====================================================
-   JUMP
-===================================================== */
-
-function setupJump(){
-
-    const jump=
-        document.getElementById(
-            "jump"
-        );
-
-
-    jump.addEventListener(
-        "pointerdown",
-        e=>{
-
-            e.preventDefault();
-            e.stopPropagation();
-
-
-            if(
-                grounded &&
-                gameStarted
-            ){
-
-                velocityY=JUMP;
-
-                grounded=false;
-
             }
 
+            let html = '';
+            repos.forEach(repo => {
+                const fileCount = repo.files ? repo.files.length : 0;
+                const hasIndex = repo.files && repo.files.some(f => f.name === 'index.html');
+                
+                html += '<div class="repo-card">';
+                html += '<h3>📁 ' + repo.name + '</h3>';
+                html += '<p>' + (repo.description || 'Нет описания') + ' • ' + fileCount + ' файл(ов)</p>';
+                html += '<div class="repo-actions">';
+                html += '<button onclick="openRepo(' + repo.id + ')">Открыть</button>';
+                if (hasIndex) {
+                    html += '<button class="btn-pages" onclick="openSiteInNewTab(' + repo.id + ')">🌐 Открыть сайт</button>';
+                }
+                html += '<button class="btn-create-page" onclick="showCreatePage(' + repo.id + ')">📄 Создать Pages</button>';
+                html += '</div>';
+                html += '</div>';
+            });
+            
+            content.innerHTML = html;
         }
-    );
 
-}
+        function showPagesList() {
+            const content = document.getElementById('content');
+            
+            // Ищем репозитории, у которых есть файлы и которые помечены как pages
+            const pagesRepos = repos.filter(repo => 
+                repo.isPage === true && repo.files && repo.files.some(f => f.name === 'index.html')
+            );
 
-
-/* =====================================================
-   KEYBOARD
-===================================================== */
-
-const keys={};
-
-
-function setupKeyboard(){
-
-    addEventListener(
-        "keydown",
-        e=>{
-
-            keys[
-                e.key.toLowerCase()
-            ]=true;
-
-
-            if(
-                e.code==="Space" &&
-                grounded &&
-                gameStarted
-            ){
-
-                velocityY=JUMP;
-
-                grounded=false;
-
+            if (pagesRepos.length === 0) {
+                content.innerHTML = '<div class="empty-state"><div class="icon">🌐</div><h2>Нет страниц</h2><p>Нажмите "Создать Pages" в репозитории с файлом index.html</p></div>';
+                return;
             }
 
+            let html = '<p style="margin-bottom: 20px; color: #8b949e;">Ваши опубликованные сайты:</p>';
+            pagesRepos.forEach(repo => {
+                html += '<div class="repo-card">';
+                html += '<h3>🌐 ' + (repo.pageName || repo.name) + '</h3>';
+                html += '<p>Репозиторий: ' + repo.name + '</p>';
+                html += '<div class="site-url">';
+                html += '<span>chugurhub.' + (repo.pageName || repo.name) + '.pages.app</span>';
+                html += '</div>';
+                html += '<div class="repo-actions">';
+                html += '<button class="btn-preview" onclick="openSiteInNewTab(' + repo.id + ')">↗ Открыть в новой вкладке</button>';
+                html += '<button class="btn-danger" onclick="deletePage(' + repo.id + ')">🗑 Удалить страницу</button>';
+                html += '</div>';
+                html += '</div>';
+            });
+            
+            content.innerHTML = html;
         }
-    );
 
-
-    addEventListener(
-        "keyup",
-        e=>{
-
-            keys[
-                e.key.toLowerCase()
-            ]=false;
-
-        }
-    );
-
-}
-
-
-/* =====================================================
-   CAMERA
-===================================================== */
-
-function setupCamera(){
-
-    let active=false;
-
-    let pointerId=null;
-
-    let lastX=0;
-
-    let lastY=0;
-
-
-    renderer.domElement.addEventListener(
-        "pointerdown",
-        e=>{
-
-            if(
-                e.clientX<
-                innerWidth*.5
-            )
+        function showCreatePage(repoId) {
+            const repo = repos.find(r => r.id === repoId);
+            if (!repo) {
+                showToast('Репозиторий не найден!');
                 return;
+            }
 
-
-            const jump=
-                document
-                    .getElementById(
-                        "jump"
-                    )
-                    .getBoundingClientRect();
-
-
-            if(
-                e.clientX>=jump.left &&
-                e.clientX<=jump.right &&
-                e.clientY>=jump.top &&
-                e.clientY<=jump.bottom
-            )
+            // Проверяем наличие index.html
+            const hasIndex = repo.files && repo.files.some(f => f.name === 'index.html');
+            if (!hasIndex) {
+                showToast('Сначала создайте файл index.html в репозитории!');
                 return;
+            }
 
-
-            active=true;
-
-            pointerId=
-                e.pointerId;
-
-
-            lastX=e.clientX;
-            lastY=e.clientY;
-
-
-            renderer.domElement
-                .setPointerCapture(
-                    pointerId
-                );
-
+            currentRepo = repo;
+            document.getElementById('createPageModal').classList.add('show');
+            document.getElementById('pageName').value = repo.name + '-page';
         }
-    );
 
-
-    renderer.domElement.addEventListener(
-        "pointermove",
-        e=>{
-
-            if(
-                !active ||
-                e.pointerId!==pointerId
-            )
+        function createPage() {
+            const pageName = document.getElementById('pageName').value.trim();
+            
+            if (!pageName) {
+                showToast('Введите название страницы!');
                 return;
-
-
-            const dx=
-                e.clientX-lastX;
-
-
-            const dy=
-                e.clientY-lastY;
-
-
-            /*
-                ВЕРТИКАЛЬНАЯ КАМЕРА ПЕРЕВЁРНУТА.
-
-                Мотаешь вверх → камера идёт вниз.
-                Мотаешь вниз → камера идёт вверх.
-
-                Чувствительность .004
-                оставлена прежней.
-            */
-
-            targetCameraYaw -=
-                dx*.006;
-
-
-            targetCameraPitch +=
-                dy*.004;
-
-
-            /*
-                Большой диапазон вверх.
-
-                Теперь можно смотреть
-                практически прямо вверх.
-
-                Но камера не сможет
-                перевернуться полностью.
-            */
-
-            targetCameraPitch=
-                THREE.MathUtils.clamp(
-
-                    targetCameraPitch,
-
-                    -0.85,
-
-                    1.50
-
-                );
-
-
-            lastX=
-                e.clientX;
-
-
-            lastY=
-                e.clientY;
-
-        }
-    );
-
-
-    function end(e){
-
-        if(
-            e.pointerId!==pointerId
-        )
-            return;
-
-
-        active=false;
-
-        pointerId=null;
-
-    }
-
-
-    renderer.domElement.addEventListener(
-        "pointerup",
-        end
-    );
-
-
-    renderer.domElement.addEventListener(
-        "pointercancel",
-        end
-    );
-
-}
-
-
-/* =====================================================
-   CUBE COLLISION
-===================================================== */
-
-function checkCubeCollision(
-    oldX,
-    oldY,
-    oldZ
-){
-
-    if(!player)
-        return;
-
-
-    /*
-        Размер персонажа
-        приблизительно.
-    */
-
-    const playerHalf=.55;
-
-
-    for(
-        const obj of physicalObjects
-    ){
-
-        const cube=obj.mesh;
-
-
-        const halfX=
-            obj.width/2;
-
-
-        const halfZ=
-            obj.depth/2;
-
-
-        const cubeTop=
-            cube.position.y+
-            obj.height/2;
-
-
-        const playerBottom=
-            player.position.y;
-
-
-        /*
-            Игрок падает сверху
-            на куб.
-        */
-
-        const insideX=
-            Math.abs(
-                player.position.x-
-                cube.position.x
-            )
-            <
-            halfX+
-            playerHalf;
-
-
-        const insideZ=
-            Math.abs(
-                player.position.z-
-                cube.position.z
-            )
-            <
-            halfZ+
-            playerHalf;
-
-
-        if(
-            insideX &&
-            insideZ &&
-            velocityY<=0 &&
-            playerBottom<=cubeTop+.7 &&
-            playerBottom>=cubeTop-.8
-        ){
-
-            player.position.y=
-                cubeTop;
-
-
-            velocityY=0;
-
-            grounded=true;
-
+            }
+
+            if (!currentRepo) {
+                showToast('Ошибка!');
+                return;
+            }
+
+            // Проверяем, есть ли index.html
+            const hasIndex = currentRepo.files && currentRepo.files.some(f => f.name === 'index.html');
+            if (!hasIndex) {
+                showToast('Нет файла index.html!');
+                return;
+            }
+
+            // Помечаем репозиторий как страницу
+            currentRepo.isPage = true;
+            currentRepo.pageName = pageName;
+            
+            saveData();
+            closeModal('createPageModal');
+            showReposList();
+            showToast('Страница создана! Перейдите во вкладку Pages');
         }
 
-    }
-
-}
-
-
-/* =====================================================
-   PLAYER MOVEMENT
-===================================================== */
-
-function updatePlayer(delta){
-
-    if(!gameStarted)
-        return;
-
-
-    let x=joystickX;
-
-    let z=joystickY;
-
-
-    if(keys["w"])
-        z=-1;
-
-    if(keys["s"])
-        z=1;
-
-    if(keys["a"])
-        x=-1;
-
-    if(keys["d"])
-        x=1;
-
-
-    const length=
-        Math.sqrt(
-            x*x+
-            z*z
-        );
-
-
-    if(length>1){
-
-        x/=length;
-        z/=length;
-
-    }
-
-
-    moving=
-        Math.abs(x)>.05 ||
-        Math.abs(z)>.05;
-
-
-    const forward=
-        new THREE.Vector3(
-
-            -Math.sin(
-                cameraYaw
-            ),
-
-            0,
-
-            -Math.cos(
-                cameraYaw
-            )
-
-        );
-
-
-    const right=
-        new THREE.Vector3(
-
-            Math.cos(
-                cameraYaw
-            ),
-
-            0,
-
-            -Math.sin(
-                cameraYaw
-            )
-
-        );
-
-
-    const direction=
-        new THREE.Vector3();
-
-
-    direction.addScaledVector(
-        forward,
-        -z
-    );
-
-
-    direction.addScaledVector(
-        right,
-        x
-    );
-
-
-    if(
-        direction.lengthSq()>0
-    ){
-
-        direction.normalize();
-
-
-        player.position.x +=
-            direction.x*
-            SPEED*
-            delta;
-
-
-        player.position.z +=
-            direction.z*
-            SPEED*
-            delta;
-
-
-        const targetRotation=
-            Math.atan2(
-                direction.x,
-                direction.z
-            );
-
-
-        player.rotation.y=
-            THREE.MathUtils.lerp(
-
-                player.rotation.y,
-
-                targetRotation,
-
-                Math.min(
-                    1,
-                    delta*12
-                )
-
-            );
-
-    }
-
-
-    /*
-        Запоминаем высоту
-        до движения вниз.
-    */
-
-    const oldX=
-        player.position.x;
-
-    const oldY=
-        player.position.y;
-
-    const oldZ=
-        player.position.z;
-
-
-    /* GRAVITY */
-
-    velocityY -=
-        GRAVITY*delta;
-
-
-    player.position.y +=
-        velocityY*delta;
-
-
-    /*
-        Сначала обычная земля.
-    */
-
-    if(
-        player.position.y<=GROUND_Y
-    ){
-
-        player.position.y=
-            GROUND_Y;
-
-        velocityY=0;
-
-        grounded=true;
-
-    }
-
-
-    /*
-        Проверяем кубы.
-    */
-
-    checkCubeCollision(
-        oldX,
-        oldY,
-        oldZ
-    );
-
-
-    /*
-        Ограничение поля.
-
-        Поле огромное.
-    */
-
-    const limit=88;
-
-
-    player.position.x=
-        THREE.MathUtils.clamp(
-            player.position.x,
-            -limit,
-            limit
-        );
-
-
-    player.position.z=
-        THREE.MathUtils.clamp(
-            player.position.z,
-            -limit,
-            limit
-        );
-
-
-    /*
-        НЕВИДИМАЯ ЗОНА СМЕРТИ.
-
-        Работает только после
-        первых 5 секунд.
-    */
-
-    if(
-        deathZoneActive &&
-        player.position.y<=deathZoneY
-    ){
-
-        respawnPlayer();
-
-    }
-
-
-    animateCharacter(delta);
-
-}
-
-
-/* =====================================================
-   RESPAWN
-===================================================== */
-
-function respawnPlayer(){
-
-    /*
-        Игрок исчезает буквально
-        на один момент и появляется
-        в центре платформы.
-    */
-
-    player.visible=false;
-
-
-    setTimeout(()=>{
-
-        player.position.copy(
-            spawnPoint
-        );
-
-
-        velocityY=0;
-
-        grounded=true;
-
-        player.rotation.set(
-            0,
-            0,
-            0
-        );
-
-
-        player.visible=true;
-
-    },120);
-
-}
-
-
-/* =====================================================
-   CHARACTER ANIMATION
-===================================================== */
-
-let walkTime=0;
-
-
-function animateCharacter(delta){
-
-    if(!player)
-        return;
-
-
-    if(moving){
-
-        walkTime+=
-            delta*10;
-
-
-        const swing=
-            Math.sin(
-                walkTime
-            )*.55;
-
-
-        if(parts.leftArm)
-            parts.leftArm.rotation.x=
-                swing;
-
-
-        if(parts.rightArm)
-            parts.rightArm.rotation.x=
-                -swing;
-
-
-        if(parts.leftLeg)
-            parts.leftLeg.rotation.x=
-                -swing;
-
-
-        if(parts.rightLeg)
-            parts.rightLeg.rotation.x=
-                swing;
-
-
-        parts.body.position.y=
-            3.25+
-            Math.abs(
-                Math.sin(
-                    walkTime*2
-                )
-            )*.055;
-
-    }
-    else{
-
-        if(parts.leftArm)
-            parts.leftArm.rotation.x=
-                THREE.MathUtils.lerp(
-                    parts.leftArm.rotation.x,
-                    0,
-                    .15
-                );
-
-
-        if(parts.rightArm)
-            parts.rightArm.rotation.x=
-                THREE.MathUtils.lerp(
-                    parts.rightArm.rotation.x,
-                    0,
-                    .15
-                );
-
-
-        if(parts.leftLeg)
-            parts.leftLeg.rotation.x=
-                THREE.MathUtils.lerp(
-                    parts.leftLeg.rotation.x,
-                    0,
-                    .15
-                );
-
-
-        if(parts.rightLeg)
-            parts.rightLeg.rotation.x=
-                THREE.MathUtils.lerp(
-                    parts.rightLeg.rotation.x,
-                    0,
-                    .15
-                );
-
-
-        parts.body.position.y=
-            THREE.MathUtils.lerp(
-                parts.body.position.y,
-                3.25,
-                .12
-            );
-
-    }
-
-}
-
-
-/* =====================================================
-   CAMERA UPDATE
-===================================================== */
-
-function updateCamera(delta){
-
-    if(!player)
-        return;
-
-
-    const cameraSmooth=
-        1-Math.pow(
-            .0005,
-            delta
-        );
-
-
-    cameraYaw=
-        THREE.MathUtils.lerp(
-            cameraYaw,
-            targetCameraYaw,
-            cameraSmooth
-        );
-
-
-    cameraPitch=
-        THREE.MathUtils.lerp(
-            cameraPitch,
-            targetCameraPitch,
-            cameraSmooth
-        );
-
-
-    const distance=7.4;
-
-
-    const target=
-        new THREE.Vector3(
-
-            player.position.x,
-
-            player.position.y+2.35,
-
-            player.position.z
-
-        );
-
-
-    const offset=
-        new THREE.Vector3(
-
-            Math.sin(
-                cameraYaw
-            )*
-            distance*
-            Math.cos(
-                cameraPitch
-            ),
-
-            3.15+
-            Math.sin(
-                cameraPitch
-            )*
-            distance,
-
-            Math.cos(
-                cameraYaw
-            )*
-            distance*
-            Math.cos(
-                cameraPitch
-            )
-
-        );
-
-
-    const desired=
-        target.clone()
-            .add(offset);
-
-
-    const follow=
-        1-Math.pow(
-            .00005,
-            delta
-        );
-
-
-    camera.position.lerp(
-        desired,
-        follow
-    );
-
-
-    camera.lookAt(
-        target
-    );
-
-}
-
-
-/* =====================================================
-   START
-===================================================== */
-
-async function startGame(){
-
-    try{
-
-        if(
-            document
-                .documentElement
-                .requestFullscreen
-        ){
-
-            await document
-                .documentElement
-                .requestFullscreen();
-
+        function deletePage(id) {
+            if (confirm('Удалить эту страницу?')) {
+                const repo = repos.find(r => r.id === id);
+                if (repo) {
+                    repo.isPage = false;
+                    delete repo.pageName;
+                    saveData();
+                    showPagesList();
+                    showToast('Страница удалена');
+                }
+            }
         }
 
-    }
-    catch(e){}
-
-
-    try{
-
-        if(
-            screen.orientation &&
-            screen.orientation.lock
-        ){
-
-            await screen.orientation.lock(
-                "landscape"
-            );
-
+        function openSiteInNewTab(id) {
+            const repo = repos.find(r => r.id === id);
+            if (!repo) return;
+            
+            const indexFile = repo.files.find(f => f.name === 'index.html');
+            if (!indexFile) return;
+            
+            // Создаём Blob URL и открываем в новой вкладке
+            const blob = new Blob([indexFile.content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            
+            // Открываем в новой вкладке
+            window.open(url, '_blank');
+            
+            // Показываем toast с "адресом" сайта
+            const pageName = repo.pageName || repo.name;
+            showToast('Сайт открыт: chugurhub.' + pageName + '.pages.app');
         }
 
-    }
-    catch(e){}
+        function showCreateRepo() {
+            document.getElementById('createRepoModal').classList.add('show');
+            document.getElementById('repoName').value = '';
+            document.getElementById('repoDesc').value = '';
+        }
 
+        function createRepo() {
+            const name = document.getElementById('repoName').value.trim();
+            const description = document.getElementById('repoDesc').value.trim();
+            
+            if (!name) {
+                showToast('Введите название!');
+                return;
+            }
 
-    gameStarted=true;
+            const repo = {
+                id: Date.now(),
+                name: name,
+                description: description,
+                files: [],
+                isPage: false
+            };
 
+            repos.push(repo);
+            saveData();
+            closeModal('createRepoModal');
+            showReposList();
+            showToast('Репозиторий создан!');
+        }
 
-    document
-        .getElementById(
-            "startScreen"
-        )
-        .classList.add(
-            "hidden"
-        );
+        function openRepo(id) {
+            currentRepo = repos.find(r => r.id === id);
+            if (!currentRepo) return;
+            
+            const content = document.getElementById('content');
+            
+            let html = '<div style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">';
+            html += '<button class="btn-secondary" onclick="showReposList()">← Назад</button> ';
+            html += '<button onclick="showCreateFile()">+ Файл</button>';
+            
+            const hasIndex = currentRepo.files.some(f => f.name === 'index.html');
+            if (hasIndex) {
+                html += '<button class="btn-pages" onclick="openSiteInNewTab(' + currentRepo.id + ')">🌐 Сайт</button>';
+                html += '<button class="btn-create-page" onclick="showCreatePage(' + currentRepo.id + ')">📄 Создать Pages</button>';
+            }
+            html += '</div>';
+            html += '<h2 style="margin-bottom: 15px;">📁 ' + currentRepo.name + '</h2>';
+            
+            if (currentRepo.files && currentRepo.files.length > 0) {
+                currentRepo.files.forEach(file => {
+                    const icon = getFileIcon(file.name);
+                    html += '<div class="file-item">';
+                    html += '<span>' + icon + '</span>';
+                    html += '<span class="file-name">' + file.name + '</span>';
+                    html += '<button onclick="openFile(' + file.id + ')">Открыть</button>';
+                    html += '<button class="btn-danger" onclick="deleteFile(' + file.id + ')">🗑</button>';
+                    html += '</div>';
+                });
+            } else {
+                html += '<p style="color: #8b949e; text-align: center; padding: 20px;">Нет файлов. Создайте файл index.html чтобы опубликовать сайт!</p>';
+            }
+            
+            content.innerHTML = html;
+        }
 
+        function showCreateFile() {
+            document.getElementById('createFileModal').classList.add('show');
+            document.getElementById('fileName').value = '';
+        }
 
-    document
-        .getElementById(
-            "help"
-        )
-        .classList.add(
-            "show"
-        );
+        function createFile() {
+            const name = document.getElementById('fileName').value.trim();
+            
+            if (!name) {
+                showToast('Введите название файла!');
+                return;
+            }
 
-}
+            const file = {
+                id: Date.now(),
+                name: name,
+                content: name.endsWith('.html') ? '<!DOCTYPE html>\n<html>\n<head>\n    <title>Новая страница</title>\n</head>\n<body>\n    <h1>Привет, ChugurHub!</h1>\n</body>\n</html>' : ''
+            };
 
+            currentRepo.files.push(file);
+            saveData();
+            closeModal('createFileModal');
+            openRepo(currentRepo.id);
+            showToast('Файл создан!');
+        }
 
-document
-    .getElementById(
-        "startButton"
-    )
-    .addEventListener(
-        "click",
-        startGame
-    );
+        function openFile(id) {
+            currentFile = currentRepo.files.find(f => f.id === id);
+            if (!currentFile) return;
+            
+            const content = document.getElementById('content');
+            
+            let html = '<div style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">';
+            html += '<button class="btn-secondary" onclick="openRepo(' + currentRepo.id + ')">← Назад</button> ';
+            html += '<button onclick="saveFile()">💾 Сохранить</button> ';
+            if (currentFile.name.endsWith('.html')) {
+                html += '<button class="btn-preview" onclick="previewFile()">👁 Предпросмотр</button>';
+                html += '<button class="btn-pages" onclick="openSiteInNewTab(' + currentRepo.id + ')">🌐 Сайт</button>';
+                html += '<button class="btn-create-page" onclick="showCreatePage(' + currentRepo.id + ')">📄 Создать Pages</button>';
+            }
+            html += '</div>';
+            html += '<h3 style="margin-bottom: 10px;">' + getFileIcon(currentFile.name) + ' ' + currentFile.name + '</h3>';
+            html += '<textarea id="fileContent" style="min-height: 400px;">' + escapeHtml(currentFile.content) + '</textarea>';
+            
+            content.innerHTML = html;
+        }
 
+        function saveFile() {
+            const textarea = document.getElementById('fileContent');
+            if (textarea && currentFile) {
+                currentFile.content = textarea.value;
+                saveData();
+                showToast('Сохранено!');
+            }
+        }
 
-/* =====================================================
-   RESIZE
-===================================================== */
+        function previewFile() {
+            const textarea = document.getElementById('fileContent');
+            if (textarea) {
+                currentFile.content = textarea.value;
+                saveData();
+                
+                const content = document.getElementById('content');
+                content.innerHTML = '<button class="btn-secondary" onclick="openFile(' + currentFile.id + ')">← Назад</button><br><br>';
+                content.innerHTML += '<iframe srcdoc="' + escapeHtml(currentFile.content) + '"></iframe>';
+            }
+        }
 
-function resize(){
+        function deleteFile(id) {
+            if (confirm('Удалить этот файл?')) {
+                currentRepo.files = currentRepo.files.filter(f => f.id !== id);
+                saveData();
+                openRepo(currentRepo.id);
+                showToast('Файл удалён');
+            }
+        }
 
-    camera.aspect=
-        innerWidth/
-        innerHeight;
+        function getFileIcon(name) {
+            if (name.endsWith('.html')) return '🌐';
+            if (name.endsWith('.css')) return '🎨';
+            if (name.endsWith('.js')) return '⚡';
+            if (name.endsWith('.json')) return '📋';
+            if (name.endsWith('.md')) return '📝';
+            if (name.endsWith('.py')) return '🐍';
+            return '📄';
+        }
 
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
 
-    camera.updateProjectionMatrix();
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
 
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
 
-    renderer.setSize(
-        innerWidth,
-        innerHeight,
-        false
-    );
+        // Закрытие модальных окон при клике вне
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('show');
+                }
+            });
+        });
 
-}
-
-
-/* =====================================================
-   GAME LOOP
-===================================================== */
-
-function animate(){
-
-    requestAnimationFrame(
-        animate
-    );
-
-
-    const now=
-        performance.now();
-
-
-    let delta=
-        (now-
-        (clock?.oldTime || now))
-        /1000;
-
-
-    if(clock)
-        clock.oldTime=now;
-
-
-    delta=
-        Math.min(
-            delta,
-            .05
-        );
-
-
-    updatePlayer(
-        delta
-    );
-
-
-    updateCamera(
-        delta
-    );
-
-
-    renderer.render(
-        scene,
-        camera
-    );
-
-}
-
-
-/* =====================================================
-   START ENGINE
-===================================================== */
-
-init();
-
-</script>
-
+        // Инициализация
+        loadData();
+        showReposList();
+    </script>
 </body>
     </html>
