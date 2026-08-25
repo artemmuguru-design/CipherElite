@@ -1,1737 +1,626 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-
-<title>RNG 3D Legends</title>
-
-<style>
-*{
-    box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
-}
-
-html,body{
-    margin:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    font-family:Arial,sans-serif;
-    background:#050611;
-    color:white;
-}
-
-canvas{
-    display:block;
-}
-
-#game{
-    position:fixed;
-    inset:0;
-}
-
-.ui{
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-}
-
-.top{
-    position:absolute;
-    top:12px;
-    left:12px;
-    right:12px;
-
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
-
-.logo{
-    padding:11px 15px;
-    border-radius:15px;
-
-    background:rgba(8,10,30,.72);
-    border:1px solid rgba(255,255,255,.12);
-
-    backdrop-filter:blur(12px);
-
-    font-weight:900;
-    letter-spacing:1px;
-}
-
-.logo span{
-    color:#887cff;
-}
-
-.coins{
-    display:flex;
-    align-items:center;
-    gap:7px;
-
-    padding:10px 14px;
-
-    border-radius:15px;
-    background:rgba(8,10,30,.72);
-    border:1px solid rgba(255,255,255,.12);
-
-    backdrop-filter:blur(12px);
-
-    font-weight:bold;
-}
-
-.coin{
-    width:22px;
-    height:22px;
-
-    display:grid;
-    place-items:center;
-
-    border-radius:50%;
-
-    background:linear-gradient(135deg,#fff36c,#ffad00);
-    color:#704500;
-}
-
-.bottom{
-    position:absolute;
-    bottom:15px;
-    left:50%;
-    transform:translateX(-50%);
-
-    width:min(600px,calc(100% - 25px));
-
-    pointer-events:auto;
-}
-
-.buttons{
-    display:flex;
-    gap:10px;
-}
-
-button{
-    border:0;
-    color:white;
-    font-weight:900;
-    cursor:pointer;
-}
-
-.summon{
-    flex:1;
-
-    padding:17px;
-
-    border-radius:17px;
-
-    background:linear-gradient(135deg,#6657ff,#a54dff);
-
-    box-shadow:
-        0 8px 30px rgba(108,83,255,.35);
-}
-
-.ten{
-    flex:1;
-
-    padding:17px;
-
-    border-radius:17px;
-
-    background:linear-gradient(135deg,#ff5667,#ff914f);
-
-    box-shadow:
-        0 8px 30px rgba(255,86,103,.3);
-}
-
-button:active{
-    transform:scale(.96);
-}
-
-.hint{
-    margin-top:8px;
-
-    text-align:center;
-
-    color:#9299bd;
-    font-size:12px;
-}
-
-.panel{
-    position:absolute;
-
-    top:75px;
-    right:12px;
-
-    width:185px;
-
-    padding:13px;
-
-    border-radius:18px;
-
-    background:rgba(7,9,28,.7);
-    border:1px solid rgba(255,255,255,.1);
-
-    backdrop-filter:blur(12px);
-
-    pointer-events:auto;
-}
-
-.panel h3{
-    margin:0 0 10px;
-    font-size:14px;
-}
-
-.stat{
-    display:flex;
-    justify-content:space-between;
-
-    padding:6px 0;
-
-    color:#9ea6c7;
-
-    font-size:12px;
-}
-
-.stat b{
-    color:white;
-}
-
-.collection{
-    margin-top:8px;
-
-    max-height:110px;
-
-    overflow:auto;
-
-    display:grid;
-    grid-template-columns:repeat(5,1fr);
-    gap:5px;
-}
-
-.smallChar{
-    height:28px;
-
-    display:grid;
-    place-items:center;
-
-    border-radius:7px;
-
-    background:rgba(255,255,255,.06);
-
-    font-size:17px;
-}
-
-.locked{
-    opacity:.25;
-    filter:grayscale(1);
-}
-
-.result{
-    position:fixed;
-    inset:0;
-
-    display:none;
-
-    align-items:center;
-    justify-content:center;
-
-    background:rgba(1,2,10,.76);
-
-    backdrop-filter:blur(10px);
-
-    z-index:20;
-
-    pointer-events:auto;
-}
-
-.result.show{
-    display:flex;
-}
-
-.card{
-    width:min(390px,calc(100% - 30px));
-
-    padding:28px;
-
-    text-align:center;
-
-    border-radius:28px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,.14),
-            rgba(255,255,255,.04)
-        );
-
-    border:1px solid rgba(255,255,255,.18);
-
-    box-shadow:0 30px 100px rgba(0,0,0,.6);
-
-    animation:appear .45s cubic-bezier(.2,.9,.2,1);
-}
-
-@keyframes appear{
-    from{
-        opacity:0;
-        transform:scale(.6);
-    }
-
-    to{
-        opacity:1;
-        transform:scale(1);
-    }
-}
-
-.resultIcon{
-    font-size:95px;
-    margin:10px;
-
-    filter:drop-shadow(0 0 25px currentColor);
-}
-
-.resultName{
-    font-size:30px;
-    font-weight:900;
-}
-
-.resultRarity{
-    display:inline-block;
-
-    margin:10px 0;
-
-    padding:7px 15px;
-
-    border-radius:20px;
-
-    font-weight:900;
-}
-
-.common{
-    color:#c1c6d2;
-}
-
-.rare{
-    color:#4fa8ff;
-}
-
-.epic{
-    color:#bd62ff;
-}
-
-.legendary{
-    color:#ffd047;
-}
-
-.mythic{
-    color:#ff4d7c;
-}
-
-.description{
-    color:#aab1cd;
-    line-height:1.5;
-    margin:10px 0 20px;
-}
-
-.close{
-    width:100%;
-
-    padding:14px;
-
-    border-radius:14px;
-
-    background:white;
-    color:#12152a;
-}
-
-.flash{
-    position:fixed;
-    inset:0;
-
-    background:white;
-
-    opacity:0;
-
-    pointer-events:none;
-
-    z-index:15;
-}
-
-.flash.active{
-    animation:flash .5s ease;
-}
-
-@keyframes flash{
-    0%{opacity:0}
-    20%{opacity:.8}
-    100%{opacity:0}
-}
-
-@media(max-width:600px){
-
-    .panel{
-        top:auto;
-        bottom:100px;
-        right:10px;
-        width:150px;
-    }
-
-    .logo{
-        font-size:13px;
-    }
-
-    .coins{
-        font-size:13px;
-    }
-
-    .bottom{
-        bottom:10px;
-    }
-}
-</style>
-</head>
-
-<body>
-
-<div id="game"></div>
-
-<div class="ui">
-
-    <div class="top">
-
-        <div class="logo">
-            RNG <span>3D LEGENDS</span>
-        </div>
-
-        <div class="coins">
-            <div class="coin">★</div>
-            <span id="coins">1000</span>
-        </div>
-
-    </div>
-
-
-    <div class="panel">
-
-        <h3>📊 Профиль</h3>
-
-        <div class="stat">
-            <span>Призывы</span>
-            <b id="total">0</b>
-        </div>
-
-        <div class="stat">
-            <span>Коллекция</span>
-            <b id="owned">0/15</b>
-        </div>
-
-        <div class="stat">
-            <span>Лучшее</span>
-            <b id="best">—</b>
-        </div>
-
-        <h3 style="margin-top:10px">
-            📖 Герои
-        </h3>
-
-        <div
-            class="collection"
-            id="collection">
-        </div>
-
-    </div>
-
-
-    <div class="bottom">
-
-        <div class="buttons">
-
-            <button
-                class="summon"
-                onclick="summon(1)">
-                ✨ ПРИЗВАТЬ · 100
-            </button>
-
-            <button
-                class="ten"
-                onclick="summon(10)">
-                🔥 ×10 · 900
-            </button>
-
-        </div>
-
-        <div class="hint">
-            👆 Вращай 3D-мир пальцем или мышью
-        </div>
-
-    </div>
-
-</div>
-
-
-<div
-    class="flash"
-    id="flash">
-</div>
-
-
-<div
-    class="result"
-    id="result">
-
-    <div class="card">
-
-        <div
-            class="resultIcon"
-            id="resultIcon">
-            ❓
-        </div>
-
-        <div
-            class="resultName"
-            id="resultName">
-            Герой
-        </div>
-
-        <div
-            class="resultRarity"
-            id="resultRarity">
-            Редкость
-        </div>
-
-        <div
-            class="description"
-            id="resultDescription">
-            Описание
-        </div>
-
-        <button
-            class="close"
-            onclick="closeResult()">
-            ПРОДОЛЖИТЬ
-        </button>
-
-    </div>
-
-</div>
-
-
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-
-
-<script>
-
-/* =====================================================
-   ДАННЫЕ
-===================================================== */
-
-const characters = [
-
-    {
-        id:1,
-        name:"Новичок",
-        icon:"🧑",
-        rarity:"Обычный",
-        class:"common",
-        chance:30,
-        color:0xaaaaaa,
-        description:"Начальный герой путешественника."
-    },
-
-    {
-        id:2,
-        name:"Лучник",
-        icon:"🏹",
-        rarity:"Обычный",
-        class:"common",
-        chance:30,
-        color:0xb0b8c8,
-        description:"Меткий стрелок."
-    },
-
-    {
-        id:3,
-        name:"Рыцарь",
-        icon:"🛡️",
-        rarity:"Редкий",
-        class:"rare",
-        chance:12,
-        color:0x349cff,
-        description:"Защитник древнего королевства."
-    },
-
-    {
-        id:4,
-        name:"Маг",
-        icon:"🧙",
-        rarity:"Редкий",
-        class:"rare",
-        chance:13,
-        color:0x477cff,
-        description:"Повелитель магической энергии."
-    },
-
-    {
-        id:5,
-        name:"Самурай",
-        icon:"🥷",
-        rarity:"Эпический",
-        class:"epic",
-        chance:5,
-        color:0xa84cff,
-        description:"Мастер древнего меча."
-    },
-
-    {
-        id:6,
-        name:"Вампир",
-        icon:"🧛",
-        rarity:"Эпический",
-        class:"epic",
-        chance:5,
-        color:0xc13cff,
-        description:"Таинственный бессмертный."
-    },
-
-    {
-        id:7,
-        name:"Дракон",
-        icon:"🐉",
-        rarity:"Легендарный",
-        class:"legendary",
-        chance:1.5,
-        color:0xffae19,
-        description:"Древний повелитель огня."
-    },
-
-    {
-        id:8,
-        name:"Повелитель",
-        icon:"👑",
-        rarity:"Легендарный",
-        class:"legendary",
-        chance:1.5,
-        color:0xffd429,
-        description:"Король потерянного мира."
-    },
-
-    {
-        id:9,
-        name:"Космический Бог",
-        icon:"🌌",
-        rarity:"Мифический",
-        class:"mythic",
-        chance:.5,
-        color:0xff3b82,
-        description:"Существо за пределами пространства."
-    },
-
-    {
-        id:10,
-        name:"Тёмный Бог",
-        icon:"☠️",
-        rarity:"Мифический",
-        class:"mythic",
-        chance:.5,
-        color:0xff174f,
-        description:"Один из сильнейших героев."
-    },
-
-    {
-        id:11,
-        name:"Пират",
-        icon:"🏴‍☠️",
-        rarity:"Обычный",
-        class:"common",
-        chance:0,
-        color:0x999999
-    },
-
-    {
-        id:12,
-        name:"Алхимик",
-        icon:"⚗️",
-        rarity:"Редкий",
-        class:"rare",
-        chance:0,
-        color:0x349cff
-    },
-
-    {
-        id:13,
-        name:"Демон",
-        icon:"👹",
-        rarity:"Эпический",
-        class:"epic",
-        chance:0,
-        color:0xb34cff
-    },
-
-    {
-        id:14,
-        name:"Феникс",
-        icon:"🔥",
-        rarity:"Легендарный",
-        class:"legendary",
-        chance:0,
-        color:0xff9d00
-    },
-
-    {
-        id:15,
-        name:"???",
-        icon:"👁️",
-        rarity:"Мифический",
-        class:"mythic",
-        chance:0,
-        color:0xff2777
-    }
-
-];
-
-
-/* =====================================================
-   СОХРАНЕНИЕ
-===================================================== */
-
-let game =
-JSON.parse(
-    localStorage.getItem("rng3D")
-) || {
-
-    coins:1000,
-    total:0,
-    owned:[],
-    best:0
-
-};
-
-
-function save(){
-
-    localStorage.setItem(
-        "rng3D",
-        JSON.stringify(game)
-    );
-
-}
-
-
-/* =====================================================
-   THREE.JS
-===================================================== */
-
-let scene;
-let camera;
-let renderer;
-
-let crystal;
-let portal;
-let stars=[];
-
-let mouseX=0;
-let mouseY=0;
-
-let targetX=0;
-let targetY=0;
-
-let clock = new THREE.Clock();
-
-
-function init3D(){
-
-    scene =
-    new THREE.Scene();
-
-    scene.fog =
-    new THREE.FogExp2(
-        0x050611,
-        .035
-    );
-
-
-    camera =
-    new THREE.PerspectiveCamera(
-        60,
-        innerWidth/innerHeight,
-        .1,
-        100
-    );
-
-    camera.position.set(
-        0,
-        1.2,
-        7
-    );
-
-
-    renderer =
-    new THREE.WebGLRenderer({
-        antialias:true,
-        alpha:true
-    });
-
-    renderer.setPixelRatio(
-        Math.min(
-            devicePixelRatio,
-            2
-        )
-    );
-
-    renderer.setSize(
-        innerWidth,
-        innerHeight
-    );
-
-    renderer.outputColorSpace =
-        THREE.SRGBColorSpace;
-
-    document
-        .getElementById("game")
-        .appendChild(renderer.domElement);
-
-
-    /* Свет */
-
-    const ambient =
-    new THREE.AmbientLight(
-        0x8b91ff,
-        1.4
-    );
-
-    scene.add(ambient);
-
-
-    const light =
-    new THREE.PointLight(
-        0x765fff,
-        12,
-        15
-    );
-
-    light.position.set(
-        0,
-        2,
-        3
-    );
-
-    scene.add(light);
-
-
-    const light2 =
-    new THREE.PointLight(
-        0xff397d,
-        5,
-        12
-    );
-
-    light2.position.set(
-        -4,
-        1,
-        -2
-    );
-
-    scene.add(light2);
-
-
-    createFloor();
-    createPortal();
-    createCrystal();
-    createStars();
-
-    animate();
-
-}
-
-
-/* =====================================================
-   ПОЛ
-===================================================== */
-
-function createFloor(){
-
-    const geometry =
-    new THREE.CircleGeometry(
-        8,
-        64
-    );
-
-    const material =
-    new THREE.MeshStandardMaterial({
-        color:0x07091b,
-        roughness:.8,
-        metalness:.2
-    });
-
-    const floor =
-    new THREE.Mesh(
-        geometry,
-        material
-    );
-
-    floor.rotation.x =
-        -Math.PI/2;
-
-    floor.position.y =
-        -1.2;
-
-    scene.add(floor);
-
-
-    const grid =
-    new THREE.GridHelper(
-        20,
-        30,
-        0x27264e,
-        0x11132d
-    );
-
-    grid.position.y =
-        -1.18;
-
-    scene.add(grid);
-
-}
-
-
-/* =====================================================
-   ПОРТАЛ
-===================================================== */
-
-function createPortal(){
-
-    portal =
-    new THREE.Group();
-
-
-    const ringGeometry =
-    new THREE.TorusGeometry(
-        2.1,
-        .08,
-        16,
-        100
-    );
-
-    const ringMaterial =
-    new THREE.MeshBasicMaterial({
-        color:0x7166ff
-    });
-
-
-    const ring =
-    new THREE.Mesh(
-        ringGeometry,
-        ringMaterial
-    );
-
-    portal.add(ring);
-
-
-    const ring2 =
-    new THREE.Mesh(
-        new THREE.TorusGeometry(
-            1.8,
-            .035,
-            12,
-            80
-        ),
-        new THREE.MeshBasicMaterial({
-            color:0xff3d9c
-        })
-    );
-
-    portal.add(ring2);
-
-
-    const inner =
-    new THREE.Mesh(
-        new THREE.CircleGeometry(
-            1.75,
-            64
-        ),
-        new THREE.MeshBasicMaterial({
-            color:0x171544,
-            transparent:true,
-            opacity:.55,
-            side:THREE.DoubleSide
-        })
-    );
-
-    inner.position.z =
-        -.03;
-
-    portal.add(inner);
-
-
-    portal.position.y =
-        1;
-
-    scene.add(portal);
-
-}
-
-
-/* =====================================================
-   КРИСТАЛЛ
-===================================================== */
-
-function createCrystal(){
-
-    const geometry =
-    new THREE.OctahedronGeometry(
-        1.15,
-        1
-    );
-
-
-    const material =
-    new THREE.MeshPhysicalMaterial({
-
-        color:0x7165ff,
-
-        emissive:0x3128bb,
-        emissiveIntensity:1.5,
-
-        metalness:.25,
-        roughness:.12,
-
-        transparent:true,
-        opacity:.95,
-
-        clearcoat:1,
-        clearcoatRoughness:.1
-
-    });
-
-
-    crystal =
-    new THREE.Mesh(
-        geometry,
-        material
-    );
-
-    crystal.position.y =
-        1;
-
-    crystal.rotation.x =
-        .2;
-
-    scene.add(crystal);
-
-
-    /* внутреннее свечение */
-
-    const glow =
-    new THREE.PointLight(
-        0x756bff,
-        7,
-        5
-    );
-
-    glow.position.copy(
-        crystal.position
-    );
-
-    scene.add(glow);
-
-}
-
-
-/* =====================================================
-   ЗВЁЗДЫ
-===================================================== */
-
-function createStars(){
-
-    const geometry =
-    new THREE.BufferGeometry();
-
-    const positions=[];
-
-    for(let i=0;i<900;i++){
-
-        positions.push(
-            (Math.random()-.5)*40,
-            Math.random()*20-4,
-            (Math.random()-.5)*40
-        );
-
-    }
-
-    geometry.setAttribute(
-        "position",
-        new THREE.Float32BufferAttribute(
-            positions,
-            3
-        )
-    );
-
-
-    const material =
-    new THREE.PointsMaterial({
-        color:0xffffff,
-        size:.035,
-        transparent:true,
-        opacity:.8
-    });
-
-
-    const points =
-    new THREE.Points(
-        geometry,
-        material
-    );
-
-    scene.add(points);
-
-    stars.push(points);
-
-}
-
-
-/* =====================================================
-   3D АНИМАЦИЯ
-===================================================== */
-
-function animate(){
-
-    requestAnimationFrame(
-        animate
-    );
-
-
-    const t =
-        clock.getElapsedTime();
-
-
-    if(crystal){
-
-        crystal.rotation.y =
-            t*.65;
-
-        crystal.rotation.z =
-            Math.sin(t)*.15;
-
-        crystal.position.y =
-            1 +
-            Math.sin(t*2)*.12;
-
-    }
-
-
-    if(portal){
-
-        portal.rotation.z =
-            t*.25;
-
-        portal.children[1]
-            .rotation.z =
-            -t*.6;
-
-    }
-
-
-    camera.position.x +=
-        (targetX-camera.position.x)*.04;
-
-    camera.position.y +=
-        (targetY-camera.position.y)*.04;
-
-
-    camera.lookAt(
-        0,
-        1,
-        0
-    );
-
-
-    renderer.render(
-        scene,
-        camera
-    );
-
-}
-
-
-/* =====================================================
-   УПРАВЛЕНИЕ КАМЕРОЙ
-===================================================== */
-
-function moveCamera(x,y){
-
-    targetX =
-        x*.7;
-
-    targetY =
-        1.2+y*.5;
-
-}
-
-
-addEventListener(
-    "mousemove",
-    e=>{
-
-        moveCamera(
-            (e.clientX/innerWidth-.5)*2,
-            -(e.clientY/innerHeight-.5)*2
-        );
-
-    }
-);
-
-
-let touchStartX=0;
-let touchStartY=0;
-
-
-addEventListener(
-    "touchstart",
-    e=>{
-
-        touchStartX =
-            e.touches[0].clientX;
-
-        touchStartY =
-            e.touches[0].clientY;
-
-    },
-    {passive:true}
-);
-
-
-addEventListener(
-    "touchmove",
-    e=>{
-
-        const x =
-            (e.touches[0].clientX-touchStartX)
-            /innerWidth;
-
-        const y =
-            (e.touches[0].clientY-touchStartY)
-            /innerHeight;
-
-        moveCamera(
-            x*2,
-            -y*2
-        );
-
-    },
-    {passive:true}
-);
-
-
-/* =====================================================
-   RNG
-===================================================== */
-
-function randomCharacter(){
-
-    const active =
-    characters.filter(
-        c=>c.chance>0
-    );
-
-
-    let total =
-    active.reduce(
-        (a,c)=>a+c.chance,
-        0
-    );
-
-
-    let random =
-    Math.random()*total;
-
-
-    for(const c of active){
-
-        random -= c.chance;
-
-        if(random<=0)
-            return c;
-
-    }
-
-    return active[0];
-
-}
-
-
-/* =====================================================
-   SUMMON
-===================================================== */
-
-function summon(amount){
-
-    const price =
-        amount===10
-        ?900
-        :100;
-
-
-    if(game.coins<price){
-
-        alert("Недостаточно монет!");
-
-        return;
-
-    }
-
-
-    game.coins -= price;
-
-
-    let results=[];
-
-
-    for(
-        let i=0;
-        i<amount;
-        i++
-    ){
-
-        const c =
-        randomCharacter();
-
-        results.push(c);
-
-        game.total++;
-
-        register(c);
-
-    }
-
-
-    updateUI();
-
-
-    const best =
-    results.reduce(
-        (a,b)=>
-            rank(b)>rank(a)
-            ?b:a
-    );
-
-
-    playSummonEffect(
-        best,
-        ()=>{
-            showResult(
-                best,
-                amount===10
-            );
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ChugurHub</title>
+    
+    <!-- PWA мета-теги -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="ChugurHub">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0d1117">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-    );
 
-}
-
-
-/* =====================================================
-   REGISTER
-===================================================== */
-
-function register(c){
-
-    if(
-        !game.owned.includes(c.id)
-    ){
-
-        game.owned.push(c.id);
-
-    }
-
-
-    const r =
-    rank(c);
-
-
-    if(r>game.best)
-        game.best=r;
-
-}
-
-
-/* =====================================================
-   RANK
-===================================================== */
-
-function rank(c){
-
-    if(c.rarity==="Обычный")
-        return 1;
-
-    if(c.rarity==="Редкий")
-        return 2;
-
-    if(c.rarity==="Эпический")
-        return 3;
-
-    if(c.rarity==="Легендарный")
-        return 4;
-
-    if(c.rarity==="Мифический")
-        return 5;
-
-    return 0;
-
-}
-
-
-/* =====================================================
-   ЭФФЕКТ ПРИЗЫВА
-===================================================== */
-
-function playSummonEffect(
-    character,
-    callback
-){
-
-    const flash =
-    document.getElementById(
-        "flash"
-    );
-
-
-    flash.classList.remove(
-        "active"
-    );
-
-    void flash.offsetWidth;
-
-    flash.classList.add(
-        "active"
-    );
-
-
-    const color =
-    character.color;
-
-
-    crystal.material.color
-        .setHex(color);
-
-    crystal.material.emissive
-        .setHex(color);
-
-
-    crystal.scale.set(
-        1.8,
-        1.8,
-        1.8
-    );
-
-
-    createExplosion(
-        color
-    );
-
-
-    setTimeout(()=>{
-
-        crystal.scale.set(
-            1,
-            1,
-            1
-        );
-
-        crystal.material.color
-            .setHex(0x7165ff);
-
-        crystal.material.emissive
-            .setHex(0x3128bb);
-
-        callback();
-
-    },900);
-
-}
-
-
-/* =====================================================
-   EXPLOSION
-===================================================== */
-
-function createExplosion(color){
-
-    for(let i=0;i<80;i++){
-
-        const geometry =
-        new THREE.SphereGeometry(
-            .035,
-            6,
-            6
-        );
-
-
-        const material =
-        new THREE.MeshBasicMaterial({
-            color:color
-        });
-
-
-        const p =
-        new THREE.Mesh(
-            geometry,
-            material
-        );
-
-
-        p.position.copy(
-            crystal.position
-        );
-
-
-        p.userData.velocity =
-        new THREE.Vector3(
-            (Math.random()-.5)*.15,
-            (Math.random()-.5)*.15,
-            (Math.random()-.5)*.15
-        );
-
-
-        scene.add(p);
-
-
-        let life=0;
-
-
-        function move(){
-
-            life+=.016;
-
-            p.position.add(
-                p.userData.velocity
-            );
-
-            p.userData.velocity.y
-                -=.003;
-
-
-            p.scale.multiplyScalar(
-                .97
-            );
-
-
-            if(life<1.3){
-
-                requestAnimationFrame(
-                    move
-                );
-
-            }else{
-
-                scene.remove(p);
-
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .header {
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            flex: 1;
+            color: #58a6ff;
+            font-weight: bold;
+        }
+
+        button {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            touch-action: manipulation;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .btn-secondary {
+            background: #21262d;
+            border: 1px solid #30363d;
+        }
+
+        .btn-danger {
+            background: #da3633;
+        }
+
+        .btn-preview {
+            background: #58a6ff;
+            color: #000;
+        }
+
+        .btn-pages {
+            background: #a371f7;
+            color: white;
+        }
+
+        .tabs {
+            display: flex;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            flex-shrink: 0;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 15px;
+            color: #8b949e;
+            border-bottom: 2px solid transparent;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        .tab.active {
+            color: #e6edf3;
+            border-bottom-color: #58a6ff;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .repo-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .repo-card:active {
+            border-color: #58a6ff;
+            transform: scale(0.98);
+        }
+
+        .repo-card h3 {
+            color: #58a6ff;
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+
+        .repo-card p {
+            color: #8b949e;
+            font-size: 14px;
+            margin: 3px 0;
+        }
+
+        .repo-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #8b949e;
+        }
+
+        .empty-state .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        input, textarea {
+            width: 100%;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: #e6edf3;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 12px;
+            font-family: inherit;
+        }
+
+        textarea {
+            min-height: 300px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            resize: vertical;
+        }
+
+        .file-item {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            flex-wrap: wrap;
+        }
+
+        .file-item .file-name {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 500px;
+            background: white;
+            border: none;
+            border-radius: 8px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #238636;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: none;
+            z-index: 200;
+        }
+
+        .toast.show {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        .site-url {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #58a6ff;
+            margin: 5px 0;
+            word-break: break-all;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .site-url span {
+            flex: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📦 ChugurHub</h1>
+        <button onclick="showCreateRepo()">+ Новый</button>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('repos', this)">📁 Репозитории</div>
+        <div class="tab" onclick="switchTab('pages', this)">🌐 Pages</div>
+    </div>
+
+    <div class="content" id="content"></div>
+
+    <div class="modal" id="createRepoModal">
+        <div class="modal-content">
+            <h2>Создать репозиторий</h2>
+            <input type="text" id="repoName" placeholder="Название репозитория">
+            <textarea id="repoDesc" placeholder="Описание" rows="3"></textarea>
+            <button onclick="createRepo()">Создать</button>
+            <button class="btn-secondary" onclick="closeModal('createRepoModal')" style="margin-left: 10px;">Отмена</button>
+        </div>
+    </div>
+
+    <div class="modal" id="createFileModal">
+        <div class="modal-content">
+            <h2>Создать файл</h2>
+            <input type="text" id="fileName" placeholder="Название файла (например, index.html)">
+            <button onclick="createFile()">Создать</button>
+            <button class="btn-secondary" onclick="closeModal('createFileModal')" style="margin-left: 10px;">Отмена</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let repos = [];
+        let currentRepo = null;
+        let currentFile = null;
+        let currentTab = 'repos';
+
+        // Загрузка из localStorage
+        function loadData() {
+            const saved = localStorage.getItem('chugurhub_data');
+            if (saved) {
+                try {
+                    repos = JSON.parse(saved);
+                } catch(e) {
+                    repos = [];
+                }
+            }
+            
+            if (repos.length === 0) {
+                const demoRepo = {
+                    id: Date.now(),
+                    name: 'demo-site',
+                    description: 'Демонстрационный сайт',
+                    files: [
+                        {
+                            id: Date.now() + 1,
+                            name: 'index.html',
+                            content: '<!DOCTYPE html>\n<html>\n<head>\n    <title>Мой сайт</title>\n    <style>\n        body {\n            font-family: Arial;\n            text-align: center;\n            padding: 50px;\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n            color: white;\n        }\n        h1 { font-size: 3em; }\n    </style>\n</head>\n<body>\n    <h1>🚀 ChugurHub работает!</h1>\n    <p>Это демонстрационная страница</p>\n</body>\n</html>'
+                        }
+                    ]
+                };
+                repos.push(demoRepo);
+                saveData();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('chugurhub_data', JSON.stringify(repos));
+        }
+
+        function switchTab(tab, element) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            element.classList.add('active');
+            
+            if (tab === 'repos') {
+                showReposList();
+            } else {
+                showPagesList();
+            }
+        }
+
+        function showReposList() {
+            const content = document.getElementById('content');
+            
+            if (repos.length === 0) {
+                content.innerHTML = '<div class="empty-state"><div class="icon">📦</div><h2>Нет репозиториев</h2><p>Создайте свой первый репозиторий!</p></div>';
+                return;
             }
 
+            let html = '';
+            repos.forEach(repo => {
+                const fileCount = repo.files ? repo.files.length : 0;
+                const hasIndex = repo.files && repo.files.some(f => f.name === 'index.html');
+                
+                html += '<div class="repo-card">';
+                html += '<h3>📁 ' + repo.name + '</h3>';
+                html += '<p>' + (repo.description || 'Нет описания') + ' • ' + fileCount + ' файл(ов)</p>';
+                html += '<div class="repo-actions">';
+                html += '<button onclick="openRepo(' + repo.id + ')">Открыть</button>';
+                if (hasIndex) {
+                    html += '<button class="btn-pages" onclick="openSiteInNewTab(' + repo.id + ')">🌐 Открыть сайт</button>';
+                }
+                html += '</div>';
+                html += '</div>';
+            });
+            
+            content.innerHTML = html;
         }
 
-
-        move();
-
-    }
-
-}
-
-
-/* =====================================================
-   RESULT
-===================================================== */
-
-function showResult(
-    c,
-    multiple
-){
-
-    document
-        .getElementById("resultIcon")
-        .textContent=c.icon;
-
-
-    document
-        .getElementById("resultName")
-        .textContent=
-        multiple
-        ? "Лучший из ×10: "+c.name
-        : c.name;
-
-
-    const rarity =
-    document.getElementById(
-        "resultRarity"
-    );
-
-
-    rarity.textContent=
-        c.rarity;
-
-
-    rarity.className=
-        "resultRarity "+c.class;
-
-
-    document
-        .getElementById(
-            "resultDescription"
-        )
-        .textContent=
-        c.description;
-
-
-    document
-        .getElementById("result")
-        .classList.add("show");
-
-}
-
-
-/* =====================================================
-   CLOSE
-===================================================== */
-
-function closeResult(){
-
-    document
-        .getElementById("result")
-        .classList.remove("show");
-
-}
-
-
-/* =====================================================
-   UI
-===================================================== */
-
-function updateUI(){
-
-    document
-        .getElementById("coins")
-        .textContent=
-        game.coins.toLocaleString();
-
-
-    document
-        .getElementById("total")
-        .textContent=
-        game.total;
-
-
-    document
-        .getElementById("owned")
-        .textContent=
-        game.owned.length+
-        "/"+
-        characters.length;
-
-
-    const bestNames=[
-        "—",
-        "Обычный",
-        "Редкий",
-        "Эпический",
-        "Легендарный",
-        "Мифический"
-    ];
-
-
-    document
-        .getElementById("best")
-        .textContent=
-        bestNames[game.best];
-
-
-    renderCollection();
-
-    save();
-
-}
-
-
-/* =====================================================
-   COLLECTION
-===================================================== */
-
-function renderCollection(){
-
-    const box =
-    document.getElementById(
-        "collection"
-    );
-
-
-    box.innerHTML="";
-
-
-    characters.forEach(c=>{
-
-        const div =
-        document.createElement(
-            "div"
-        );
-
-
-        const unlocked =
-        game.owned.includes(c.id);
-
-
-        div.className=
-        "smallChar "+
-        (!unlocked?"locked":"");
-
-
-        div.textContent=
-        unlocked
-        ?c.icon
-        :"❔";
-
-
-        div.title=
-        unlocked
-        ?c.name
-        :"Неизвестно";
-
-
-        box.appendChild(div);
-
-    });
-
-}
-
-
-/* =====================================================
-   RESIZE
-===================================================== */
-
-addEventListener(
-    "resize",
-    ()=>{
-
-        camera.aspect =
-            innerWidth/innerHeight;
-
-        camera.updateProjectionMatrix();
-
-        renderer.setSize(
-            innerWidth,
-            innerHeight
-        );
-
-    }
-);
-
-
-/* =====================================================
-   START
-===================================================== */
-
-init3D();
-
-updateUI();
-
-</script>
-
+        function showPagesList() {
+            const content = document.getElementById('content');
+            
+            const pagesRepos = repos.filter(repo => 
+                repo.files && repo.files.some(f => f.name === 'index.html')
+            );
+
+            if (pagesRepos.length === 0) {
+                content.innerHTML = '<div class="empty-state"><div class="icon">🌐</div><h2>Нет страниц</h2><p>Создайте репозиторий с файлом index.html</p></div>';
+                return;
+            }
+
+            let html = '<p style="margin-bottom: 20px; color: #8b949e;">Ваши сайты (открываются в новой вкладке):</p>';
+            pagesRepos.forEach(repo => {
+                html += '<div class="repo-card">';
+                html += '<h3>🌐 ' + repo.name + '</h3>';
+                html += '<div class="site-url">';
+                html += '<span>chugurhub.' + repo.name + '.app</span>';
+                html += '</div>';
+                html += '<div class="repo-actions">';
+                html += '<button class="btn-preview" onclick="openSiteInNewTab(' + repo.id + ')">↗ Открыть в новой вкладке</button>';
+                html += '</div>';
+                html += '</div>';
+            });
+            
+            content.innerHTML = html;
+        }
+
+        function openSiteInNewTab(id) {
+            const repo = repos.find(r => r.id === id);
+            if (!repo) return;
+            
+            const indexFile = repo.files.find(f => f.name === 'index.html');
+            if (!indexFile) return;
+            
+            // Создаём Blob URL и открываем в новой вкладке
+            const blob = new Blob([indexFile.content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            
+            // Открываем в новой вкладке
+            const newWindow = window.open(url, '_blank');
+            
+            // Показываем toast с "адресом" сайта
+            showToast('Сайт открыт: chugurhub.' + repo.name + '.app');
+        }
+
+        function showCreateRepo() {
+            document.getElementById('createRepoModal').classList.add('show');
+            document.getElementById('repoName').value = '';
+            document.getElementById('repoDesc').value = '';
+        }
+
+        function createRepo() {
+            const name = document.getElementById('repoName').value.trim();
+            const description = document.getElementById('repoDesc').value.trim();
+            
+            if (!name) {
+                showToast('Введите название!');
+                return;
+            }
+
+            const repo = {
+                id: Date.now(),
+                name: name,
+                description: description,
+                files: []
+            };
+
+            repos.push(repo);
+            saveData();
+            closeModal('createRepoModal');
+            showReposList();
+            showToast('Репозиторий создан!');
+        }
+
+        function openRepo(id) {
+            currentRepo = repos.find(r => r.id === id);
+            if (!currentRepo) return;
+            
+            const content = document.getElementById('content');
+            
+            let html = '<div style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">';
+            html += '<button class="btn-secondary" onclick="showReposList()">← Назад</button> ';
+            html += '<button onclick="showCreateFile()">+ Файл</button>';
+            
+            const hasIndex = currentRepo.files.some(f => f.name === 'index.html');
+            if (hasIndex) {
+                html += '<button class="btn-pages" onclick="openSiteInNewTab(' + currentRepo.id + ')">🌐 Сайт</button>';
+            }
+            html += '</div>';
+            html += '<h2 style="margin-bottom: 15px;">📁 ' + currentRepo.name + '</h2>';
+            
+            if (currentRepo.files && currentRepo.files.length > 0) {
+                currentRepo.files.forEach(file => {
+                    const icon = getFileIcon(file.name);
+                    html += '<div class="file-item">';
+                    html += '<span>' + icon + '</span>';
+                    html += '<span class="file-name">' + file.name + '</span>';
+                    html += '<button onclick="openFile(' + file.id + ')">Открыть</button>';
+                    html += '<button class="btn-danger" onclick="deleteFile(' + file.id + ')">🗑</button>';
+                    html += '</div>';
+                });
+            } else {
+                html += '<p style="color: #8b949e; text-align: center; padding: 20px;">Нет файлов. Создайте файл index.html чтобы опубликовать сайт!</p>';
+            }
+            
+            content.innerHTML = html;
+        }
+
+        function showCreateFile() {
+            document.getElementById('createFileModal').classList.add('show');
+            document.getElementById('fileName').value = '';
+        }
+
+        function createFile() {
+            const name = document.getElementById('fileName').value.trim();
+            
+            if (!name) {
+                showToast('Введите название файла!');
+                return;
+            }
+
+            const file = {
+                id: Date.now(),
+                name: name,
+                content: name.endsWith('.html') ? '<!DOCTYPE html>\n<html>\n<head>\n    <title>Новая страница</title>\n</head>\n<body>\n    <h1>Привет, ChugurHub!</h1>\n</body>\n</html>' : ''
+            };
+
+            currentRepo.files.push(file);
+            saveData();
+            closeModal('createFileModal');
+            openRepo(currentRepo.id);
+            showToast('Файл создан!');
+        }
+
+        function openFile(id) {
+            currentFile = currentRepo.files.find(f => f.id === id);
+            if (!currentFile) return;
+            
+            const content = document.getElementById('content');
+            
+            let html = '<div style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">';
+            html += '<button class="btn-secondary" onclick="openRepo(' + currentRepo.id + ')">← Назад</button> ';
+            html += '<button onclick="saveFile()">💾 Сохранить</button> ';
+            if (currentFile.name.endsWith('.html')) {
+                html += '<button class="btn-preview" onclick="previewFile()">👁 Предпросмотр</button>';
+                html += '<button class="btn-pages" onclick="openSiteInNewTab(' + currentRepo.id + ')">🌐 Сайт</button>';
+            }
+            html += '</div>';
+            html += '<h3 style="margin-bottom: 10px;">' + getFileIcon(currentFile.name) + ' ' + currentFile.name + '</h3>';
+            html += '<textarea id="fileContent" style="min-height: 400px;">' + escapeHtml(currentFile.content) + '</textarea>';
+            
+            content.innerHTML = html;
+        }
+
+        function saveFile() {
+            const textarea = document.getElementById('fileContent');
+            if (textarea && currentFile) {
+                currentFile.content = textarea.value;
+                saveData();
+                showToast('Сохранено!');
+            }
+        }
+
+        function previewFile() {
+            const textarea = document.getElementById('fileContent');
+            if (textarea) {
+                currentFile.content = textarea.value;
+                saveData();
+                
+                const content = document.getElementById('content');
+                content.innerHTML = '<button class="btn-secondary" onclick="openFile(' + currentFile.id + ')">← Назад</button><br><br>';
+                content.innerHTML += '<iframe srcdoc="' + escapeHtml(currentFile.content) + '"></iframe>';
+            }
+        }
+
+        function deleteFile(id) {
+            if (confirm('Удалить этот файл?')) {
+                currentRepo.files = currentRepo.files.filter(f => f.id !== id);
+                saveData();
+                openRepo(currentRepo.id);
+                showToast('Файл удалён');
+            }
+        }
+
+        function getFileIcon(name) {
+            if (name.endsWith('.html')) return '🌐';
+            if (name.endsWith('.css')) return '🎨';
+            if (name.endsWith('.js')) return '⚡';
+            if (name.endsWith('.json')) return '📋';
+            if (name.endsWith('.md')) return '📝';
+            if (name.endsWith('.py')) return '🐍';
+            return '📄';
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Закрытие модальных окон при клике вне
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('show');
+                }
+            });
+        });
+
+        // Инициализация
+        loadData();
+        showReposList();
+    </script>
 </body>
-    </html>
+      </html>
