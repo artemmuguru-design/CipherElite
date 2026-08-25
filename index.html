@@ -82,6 +82,11 @@
             color: white;
         }
 
+        .btn-create-page {
+            background: #f0883e;
+            color: white;
+        }
+
         .tabs {
             display: flex;
             background: #161b22;
@@ -311,6 +316,15 @@
         </div>
     </div>
 
+    <div class="modal" id="createPageModal">
+        <div class="modal-content">
+            <h2>Создать страницу Pages</h2>
+            <input type="text" id="pageName" placeholder="Название страницы (для адреса)">
+            <button onclick="createPage()">Создать</button>
+            <button class="btn-secondary" onclick="closeModal('createPageModal')" style="margin-left: 10px;">Отмена</button>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <script>
@@ -385,6 +399,7 @@
                 if (hasIndex) {
                     html += '<button class="btn-pages" onclick="openSiteInNewTab(' + repo.id + ')">🌐 Открыть сайт</button>';
                 }
+                html += '<button class="btn-create-page" onclick="showCreatePage(' + repo.id + ')">📄 Создать Pages</button>';
                 html += '</div>';
                 html += '</div>';
             });
@@ -395,29 +410,94 @@
         function showPagesList() {
             const content = document.getElementById('content');
             
+            // Ищем репозитории, у которых есть файлы и которые помечены как pages
             const pagesRepos = repos.filter(repo => 
-                repo.files && repo.files.some(f => f.name === 'index.html')
+                repo.isPage === true && repo.files && repo.files.some(f => f.name === 'index.html')
             );
 
             if (pagesRepos.length === 0) {
-                content.innerHTML = '<div class="empty-state"><div class="icon">🌐</div><h2>Нет страниц</h2><p>Создайте репозиторий с файлом index.html</p></div>';
+                content.innerHTML = '<div class="empty-state"><div class="icon">🌐</div><h2>Нет страниц</h2><p>Нажмите "Создать Pages" в репозитории с файлом index.html</p></div>';
                 return;
             }
 
-            let html = '<p style="margin-bottom: 20px; color: #8b949e;">Ваши сайты (открываются в новой вкладке):</p>';
+            let html = '<p style="margin-bottom: 20px; color: #8b949e;">Ваши опубликованные сайты:</p>';
             pagesRepos.forEach(repo => {
                 html += '<div class="repo-card">';
-                html += '<h3>🌐 ' + repo.name + '</h3>';
+                html += '<h3>🌐 ' + (repo.pageName || repo.name) + '</h3>';
+                html += '<p>Репозиторий: ' + repo.name + '</p>';
                 html += '<div class="site-url">';
-                html += '<span>chugurhub.' + repo.name + '.app</span>';
+                html += '<span>chugurhub.' + (repo.pageName || repo.name) + '.pages.app</span>';
                 html += '</div>';
                 html += '<div class="repo-actions">';
                 html += '<button class="btn-preview" onclick="openSiteInNewTab(' + repo.id + ')">↗ Открыть в новой вкладке</button>';
+                html += '<button class="btn-danger" onclick="deletePage(' + repo.id + ')">🗑 Удалить страницу</button>';
                 html += '</div>';
                 html += '</div>';
             });
             
             content.innerHTML = html;
+        }
+
+        function showCreatePage(repoId) {
+            const repo = repos.find(r => r.id === repoId);
+            if (!repo) {
+                showToast('Репозиторий не найден!');
+                return;
+            }
+
+            // Проверяем наличие index.html
+            const hasIndex = repo.files && repo.files.some(f => f.name === 'index.html');
+            if (!hasIndex) {
+                showToast('Сначала создайте файл index.html в репозитории!');
+                return;
+            }
+
+            currentRepo = repo;
+            document.getElementById('createPageModal').classList.add('show');
+            document.getElementById('pageName').value = repo.name + '-page';
+        }
+
+        function createPage() {
+            const pageName = document.getElementById('pageName').value.trim();
+            
+            if (!pageName) {
+                showToast('Введите название страницы!');
+                return;
+            }
+
+            if (!currentRepo) {
+                showToast('Ошибка!');
+                return;
+            }
+
+            // Проверяем, есть ли index.html
+            const hasIndex = currentRepo.files && currentRepo.files.some(f => f.name === 'index.html');
+            if (!hasIndex) {
+                showToast('Нет файла index.html!');
+                return;
+            }
+
+            // Помечаем репозиторий как страницу
+            currentRepo.isPage = true;
+            currentRepo.pageName = pageName;
+            
+            saveData();
+            closeModal('createPageModal');
+            showReposList();
+            showToast('Страница создана! Перейдите во вкладку Pages');
+        }
+
+        function deletePage(id) {
+            if (confirm('Удалить эту страницу?')) {
+                const repo = repos.find(r => r.id === id);
+                if (repo) {
+                    repo.isPage = false;
+                    delete repo.pageName;
+                    saveData();
+                    showPagesList();
+                    showToast('Страница удалена');
+                }
+            }
         }
 
         function openSiteInNewTab(id) {
@@ -432,10 +512,11 @@
             const url = URL.createObjectURL(blob);
             
             // Открываем в новой вкладке
-            const newWindow = window.open(url, '_blank');
+            window.open(url, '_blank');
             
             // Показываем toast с "адресом" сайта
-            showToast('Сайт открыт: chugurhub.' + repo.name + '.app');
+            const pageName = repo.pageName || repo.name;
+            showToast('Сайт открыт: chugurhub.' + pageName + '.pages.app');
         }
 
         function showCreateRepo() {
@@ -457,7 +538,8 @@
                 id: Date.now(),
                 name: name,
                 description: description,
-                files: []
+                files: [],
+                isPage: false
             };
 
             repos.push(repo);
@@ -480,6 +562,7 @@
             const hasIndex = currentRepo.files.some(f => f.name === 'index.html');
             if (hasIndex) {
                 html += '<button class="btn-pages" onclick="openSiteInNewTab(' + currentRepo.id + ')">🌐 Сайт</button>';
+                html += '<button class="btn-create-page" onclick="showCreatePage(' + currentRepo.id + ')">📄 Создать Pages</button>';
             }
             html += '</div>';
             html += '<h2 style="margin-bottom: 15px;">📁 ' + currentRepo.name + '</h2>';
@@ -539,6 +622,7 @@
             if (currentFile.name.endsWith('.html')) {
                 html += '<button class="btn-preview" onclick="previewFile()">👁 Предпросмотр</button>';
                 html += '<button class="btn-pages" onclick="openSiteInNewTab(' + currentRepo.id + ')">🌐 Сайт</button>';
+                html += '<button class="btn-create-page" onclick="showCreatePage(' + currentRepo.id + ')">📄 Создать Pages</button>';
             }
             html += '</div>';
             html += '<h3 style="margin-bottom: 10px;">' + getFileIcon(currentFile.name) + ' ' + currentFile.name + '</h3>';
@@ -606,7 +690,7 @@
             toast.classList.add('show');
             setTimeout(() => {
                 toast.classList.remove('show');
-            }, 2000);
+            }, 3000);
         }
 
         // Закрытие модальных окон при клике вне
@@ -623,4 +707,4 @@
         showReposList();
     </script>
 </body>
-      </html>
+    </html>
