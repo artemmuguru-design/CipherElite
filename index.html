@@ -353,7 +353,6 @@
             }
         }, true);
 
-        // Загрузка из localStorage
         function loadData() {
             const saved = localStorage.getItem('chugurhub_data');
             if (saved) {
@@ -632,6 +631,7 @@
             let html = '<div style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">';
             html += '<button class="btn-secondary" onclick="openRepo(' + currentRepo.id + ')">← Назад</button> ';
             html += '<button onclick="saveFile()">💾 Сохранить</button> ';
+            html += '<button class="btn-secondary" onclick="downloadCurrentFile()">⬇ Скачать</button> ';
             if (currentFile.name.endsWith('.html')) {
                 html += '<button class="btn-preview" onclick="previewFile()">👁 Предпросмотр</button>';
                 html += '<button class="btn-pages" onclick="openSiteInNewTab(' + currentRepo.id + ')">🌐 Сайт</button>';
@@ -639,14 +639,12 @@
             }
             html += '</div>';
             html += '<h3 style="margin-bottom: 10px;">' + getFileIcon(currentFile.name) + ' ' + currentFile.name + '</h3>';
-            // Добавлены атрибуты для отключения проверки орфографии и автозамены, что предотвращает лаги
             html += '<textarea id="fileContent" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" style="min-height: 400px;"></textarea>';
             
             content.innerHTML = html;
             
             const textarea = document.getElementById('fileContent');
             if (textarea) {
-                // Сброс значения перед установкой нового предотвращает лаги рендеринга
                 textarea.value = '';
                 setTimeout(() => {
                     textarea.value = currentFile.content;
@@ -663,6 +661,24 @@
             }
         }
 
+        function downloadCurrentFile() {
+            if (!currentFile) return;
+            const textarea = document.getElementById('fileContent');
+            const content = textarea ? textarea.value : currentFile.content;
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = currentFile.name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast('Файл скачан: ' + currentFile.name);
+        }
+
         function previewFile() {
             const textarea = document.getElementById('fileContent');
             if (textarea) {
@@ -671,7 +687,6 @@
                 const content = document.getElementById('content');
                 content.innerHTML = '<button class="btn-secondary" onclick="openFile(' + currentFile.id + ')">← Назад</button><br><br>';
                 
-                // Используем Blob URL вместо srcdoc + escapeHtml для мгновенного рендеринга большого кода без лагов
                 const blob = new Blob([currentFile.content], { type: 'text/html' });
                 const url = URL.createObjectURL(blob);
                 
@@ -685,7 +700,6 @@
                 
                 content.appendChild(iframe);
                 
-                // Сохраняем асинхронно, чтобы не блокировать UI
                 setTimeout(() => saveData(), 0);
             }
         }
@@ -734,4 +748,4 @@
         showReposList();
     </script>
 </body>
-    </html>
+</html>
