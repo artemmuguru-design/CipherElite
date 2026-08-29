@@ -206,7 +206,6 @@
             font-family: inherit;
         }
 
-        /* Стили для панели поиска */
         .search-panel {
             background: #161b22;
             border: 1px solid #30363d;
@@ -476,8 +475,12 @@
                 setTimeout(() => {
                     textarea.value = value.substring(0, start) + text + value.substring(end);
                     textarea.selectionStart = textarea.selectionEnd = start + text.length;
-                    updateLineNumbers();
+                    
+                    // СНАЧАЛА обновляем высоту, ПОТОМ номера строк
                     autoResizeTextarea();
+                    setTimeout(() => {
+                        updateLineNumbers();
+                    }, 20);
                 }, 0);
             }
         }, true);
@@ -875,7 +878,6 @@
             html += '</div>';
             html += '<h3 style="margin-bottom: 10px;">' + getFileIcon(currentFile.name) + ' ' + currentFile.name + '</h3>';
             
-            // Панель поиска
             html += '<div class="search-panel">';
             html += '<div class="search-input-container">';
             html += '<input type="text" id="searchInput" class="search-input" placeholder="🔍 Поиск по коду..." oninput="performSearch()">';
@@ -896,13 +898,20 @@
                 textarea.value = '';
                 setTimeout(() => {
                     textarea.value = currentFile.content;
-                    updateLineNumbers();
+                    
+                    // СНАЧАЛА обновляем высоту, ПОТОМ номера строк
                     autoResizeTextarea();
+                    setTimeout(() => {
+                        updateLineNumbers();
+                    }, 30);
                 }, 10);
                 
+                // Обработчик для любого изменения текста (ввод, удаление, вставка)
                 textarea.addEventListener('input', () => {
-                    updateLineNumbers();
                     autoResizeTextarea();
+                    setTimeout(() => {
+                        updateLineNumbers();
+                    }, 10);
                 });
             }
         }
