@@ -206,7 +206,94 @@
             font-family: inherit;
         }
 
-        /* Единый scroll-контейнер для синхронной прокрутки */
+        /* Стили для панели поиска */
+        .search-panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .search-input-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .search-input {
+            flex: 1;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: #e6edf3;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .search-results {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 8px;
+            display: none;
+        }
+
+        .search-results.show {
+            display: block;
+        }
+
+        .search-result-item {
+            padding: 8px;
+            margin-bottom: 4px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .search-result-item:hover {
+            border-color: #58a6ff;
+            background: #1c2128;
+        }
+
+        .search-result-item:active {
+            transform: scale(0.98);
+        }
+
+        .search-result-line {
+            color: #58a6ff;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .search-result-code {
+            color: #e6edf3;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .search-result-code mark {
+            background: #f0883e;
+            color: #000;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        .search-no-results {
+            text-align: center;
+            padding: 20px;
+            color: #8b949e;
+            font-size: 14px;
+        }
+
         .editor-container {
             display: flex;
             background: #0d1117;
@@ -413,6 +500,92 @@
             if (!textarea) return;
             textarea.style.height = 'auto';
             textarea.style.height = textarea.scrollHeight + 'px';
+        }
+
+        function performSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const searchResults = document.getElementById('searchResults');
+            const textarea = document.getElementById('fileContent');
+            
+            if (!searchInput || !searchResults || !textarea) return;
+            
+            const query = searchInput.value.trim();
+            
+            if (!query) {
+                searchResults.classList.remove('show');
+                return;
+            }
+            
+            const lines = textarea.value.split('\n');
+            const results = [];
+            
+            lines.forEach((line, index) => {
+                const lowerLine = line.toLowerCase();
+                const lowerQuery = query.toLowerCase();
+                
+                if (lowerLine.includes(lowerQuery)) {
+                    results.push({
+                        lineNumber: index + 1,
+                        lineContent: line,
+                        query: query
+                    });
+                }
+            });
+            
+            if (results.length === 0) {
+                searchResults.innerHTML = '<div class="search-no-results">🔍 Нет данных</div>';
+            } else {
+                let html = '';
+                results.forEach(result => {
+                    const highlightedLine = highlightMatch(result.lineContent, result.query);
+                    html += '<div class="search-result-item" onclick="goToLine(' + result.lineNumber + ')">';
+                    html += '<div class="search-result-line">Строка ' + result.lineNumber + '</div>';
+                    html += '<div class="search-result-code">' + highlightedLine + '</div>';
+                    html += '</div>';
+                });
+                searchResults.innerHTML = html;
+            }
+            
+            searchResults.classList.add('show');
+        }
+
+        function highlightMatch(text, query) {
+            const escapedText = escapeHtml(text);
+            const escapedQuery = escapeHtml(query);
+            const regex = new RegExp('(' + escapeRegExp(escapedQuery) + ')', 'gi');
+            return escapedText.replace(regex, '<mark>$1</mark>');
+        }
+
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function goToLine(lineNumber) {
+            const textarea = document.getElementById('fileContent');
+            if (!textarea) return;
+            
+            const lines = textarea.value.split('\n');
+            let position = 0;
+            
+            for (let i = 0; i < lineNumber - 1; i++) {
+                position += lines[i].length + 1;
+            }
+            
+            textarea.focus();
+            textarea.setSelectionRange(position, position + lines[lineNumber - 1].length);
+            
+            const lineHeight = 19.5;
+            const scrollPosition = (lineNumber - 1) * lineHeight;
+            const container = document.getElementById('editorContainer');
+            if (container) {
+                container.scrollTop = scrollPosition - 100;
+            }
         }
 
         function loadData() {
@@ -702,6 +875,14 @@
             html += '</div>';
             html += '<h3 style="margin-bottom: 10px;">' + getFileIcon(currentFile.name) + ' ' + currentFile.name + '</h3>';
             
+            // Панель поиска
+            html += '<div class="search-panel">';
+            html += '<div class="search-input-container">';
+            html += '<input type="text" id="searchInput" class="search-input" placeholder="🔍 Поиск по коду..." oninput="performSearch()">';
+            html += '</div>';
+            html += '<div class="search-results" id="searchResults"></div>';
+            html += '</div>';
+            
             html += '<div class="editor-container" id="editorContainer">';
             html += '<div class="line-numbers" id="lineNumbers">1</div>';
             html += '<textarea id="fileContent" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>';
@@ -822,4 +1003,4 @@
         showReposList();
     </script>
 </body>
-</html>
+    </html>
