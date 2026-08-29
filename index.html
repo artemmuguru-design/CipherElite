@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ChugurHub</title>
     
-    <!-- PWA мета-теги -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="ChugurHub">
@@ -207,14 +206,16 @@
             font-family: inherit;
         }
 
-        /* Стили для редактора кода со счетчиком строк */
+        /* Единый scroll-контейнер для синхронной прокрутки */
         .editor-container {
             display: flex;
             background: #0d1117;
             border: 1px solid #30363d;
             border-radius: 6px;
-            overflow: hidden;
-            min-height: 400px;
+            overflow-y: auto;
+            overflow-x: auto;
+            max-height: 500px;
+            position: relative;
         }
 
         .line-numbers {
@@ -228,8 +229,11 @@
             user-select: none;
             border-right: 1px solid #30363d;
             min-width: 45px;
-            overflow: hidden;
             white-space: pre;
+            position: sticky;
+            left: 0;
+            z-index: 1;
+            flex-shrink: 0;
         }
 
         textarea {
@@ -241,11 +245,13 @@
             font-family: 'Courier New', monospace;
             font-size: 13px;
             line-height: 1.5;
-            resize: vertical;
+            resize: none;
             word-break: break-all;
             white-space: pre-wrap;
             overflow-wrap: break-word;
             outline: none;
+            overflow: visible;
+            min-height: 100%;
         }
 
         textarea:focus {
@@ -371,7 +377,6 @@
         let currentFile = null;
         let currentTab = 'repos';
 
-        // Оптимизированная вставка большого текста без лагов
         document.addEventListener('paste', function(e) {
             if (e.target && e.target.id === 'fileContent') {
                 e.preventDefault();
@@ -384,12 +389,12 @@
                 setTimeout(() => {
                     textarea.value = value.substring(0, start) + text + value.substring(end);
                     textarea.selectionStart = textarea.selectionEnd = start + text.length;
-                    updateLineNumbers(); // Обновляем номера строк после вставки
+                    updateLineNumbers();
+                    autoResizeTextarea();
                 }, 0);
             }
         }, true);
 
-        // Функция обновления счетчика строк (оптимизированная, без создания тысяч DOM-узлов)
         function updateLineNumbers() {
             const textarea = document.getElementById('fileContent');
             const lineNumbers = document.getElementById('lineNumbers');
@@ -401,6 +406,13 @@
                 nums += i + '\n';
             }
             lineNumbers.textContent = nums;
+        }
+
+        function autoResizeTextarea() {
+            const textarea = document.getElementById('fileContent');
+            if (!textarea) return;
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
         }
 
         function loadData() {
@@ -690,8 +702,7 @@
             html += '</div>';
             html += '<h3 style="margin-bottom: 10px;">' + getFileIcon(currentFile.name) + ' ' + currentFile.name + '</h3>';
             
-            // Новый контейнер редактора со счетчиком строк
-            html += '<div class="editor-container">';
+            html += '<div class="editor-container" id="editorContainer">';
             html += '<div class="line-numbers" id="lineNumbers">1</div>';
             html += '<textarea id="fileContent" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>';
             html += '</div>';
@@ -699,19 +710,18 @@
             content.innerHTML = html;
             
             const textarea = document.getElementById('fileContent');
-            const lineNumbers = document.getElementById('lineNumbers');
             
             if (textarea) {
                 textarea.value = '';
                 setTimeout(() => {
                     textarea.value = currentFile.content;
-                    updateLineNumbers(); // Обновляем номера строк после загрузки контента
+                    updateLineNumbers();
+                    autoResizeTextarea();
                 }, 10);
                 
-                // Синхронизация прокрутки и обновление счетчика при вводе
-                textarea.addEventListener('input', updateLineNumbers);
-                textarea.addEventListener('scroll', () => {
-                    lineNumbers.scrollTop = textarea.scrollTop;
+                textarea.addEventListener('input', () => {
+                    updateLineNumbers();
+                    autoResizeTextarea();
                 });
             }
         }
