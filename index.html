@@ -195,7 +195,7 @@
             font-size: 18px;
         }
 
-        input, textarea {
+        input {
             width: 100%;
             background: #0d1117;
             border: 1px solid #30363d;
@@ -207,8 +207,37 @@
             font-family: inherit;
         }
 
+        /* Стили для редактора кода со счетчиком строк */
+        .editor-container {
+            display: flex;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            overflow: hidden;
+            min-height: 400px;
+        }
+
+        .line-numbers {
+            background: #161b22;
+            color: #8b949e;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            padding: 12px 8px;
+            text-align: right;
+            user-select: none;
+            border-right: 1px solid #30363d;
+            min-width: 45px;
+            overflow: hidden;
+            white-space: pre;
+        }
+
         textarea {
-            min-height: 300px;
+            flex: 1;
+            background: #0d1117;
+            color: #e6edf3;
+            border: none;
+            padding: 12px;
             font-family: 'Courier New', monospace;
             font-size: 13px;
             line-height: 1.5;
@@ -216,6 +245,12 @@
             word-break: break-all;
             white-space: pre-wrap;
             overflow-wrap: break-word;
+            outline: none;
+        }
+
+        textarea:focus {
+            border: none;
+            outline: none;
         }
 
         .file-item {
@@ -304,7 +339,7 @@
         <div class="modal-content">
             <h2>Создать репозиторий</h2>
             <input type="text" id="repoName" placeholder="Название репозитория">
-            <textarea id="repoDesc" placeholder="Описание" rows="3"></textarea>
+            <textarea id="repoDesc" placeholder="Описание" rows="3" style="min-height: 80px;"></textarea>
             <button onclick="createRepo()">Создать</button>
             <button class="btn-secondary" onclick="closeModal('createRepoModal')" style="margin-left: 10px;">Отмена</button>
         </div>
@@ -349,9 +384,24 @@
                 setTimeout(() => {
                     textarea.value = value.substring(0, start) + text + value.substring(end);
                     textarea.selectionStart = textarea.selectionEnd = start + text.length;
+                    updateLineNumbers(); // Обновляем номера строк после вставки
                 }, 0);
             }
         }, true);
+
+        // Функция обновления счетчика строк (оптимизированная, без создания тысяч DOM-узлов)
+        function updateLineNumbers() {
+            const textarea = document.getElementById('fileContent');
+            const lineNumbers = document.getElementById('lineNumbers');
+            if (!textarea || !lineNumbers) return;
+
+            const lines = textarea.value.split('\n').length;
+            let nums = '';
+            for (let i = 1; i <= lines; i++) {
+                nums += i + '\n';
+            }
+            lineNumbers.textContent = nums;
+        }
 
         function loadData() {
             const saved = localStorage.getItem('chugurhub_data');
@@ -639,16 +689,30 @@
             }
             html += '</div>';
             html += '<h3 style="margin-bottom: 10px;">' + getFileIcon(currentFile.name) + ' ' + currentFile.name + '</h3>';
-            html += '<textarea id="fileContent" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" style="min-height: 400px;"></textarea>';
+            
+            // Новый контейнер редактора со счетчиком строк
+            html += '<div class="editor-container">';
+            html += '<div class="line-numbers" id="lineNumbers">1</div>';
+            html += '<textarea id="fileContent" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>';
+            html += '</div>';
             
             content.innerHTML = html;
             
             const textarea = document.getElementById('fileContent');
+            const lineNumbers = document.getElementById('lineNumbers');
+            
             if (textarea) {
                 textarea.value = '';
                 setTimeout(() => {
                     textarea.value = currentFile.content;
+                    updateLineNumbers(); // Обновляем номера строк после загрузки контента
                 }, 10);
+                
+                // Синхронизация прокрутки и обновление счетчика при вводе
+                textarea.addEventListener('input', updateLineNumbers);
+                textarea.addEventListener('scroll', () => {
+                    lineNumbers.scrollTop = textarea.scrollTop;
+                });
             }
         }
 
