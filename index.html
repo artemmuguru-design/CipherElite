@@ -32,6 +32,7 @@
         .repo-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
         .empty-state{text-align:center;padding:50px 20px;color:#8b949e}
         .empty-state .icon{font-size:60px;margin-bottom:20px}
+        .empty-state button{margin-top:20px;font-size:16px;padding:12px 24px}
         .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;z-index:100;padding:20px}
         .modal.show{display:flex}
         .modal-content{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px;width:100%;max-width:400px}
@@ -190,7 +191,10 @@
 
         function showReposList(){
             var c=document.getElementById('content');
-            if(repos.length===0){c.innerHTML='<div class="empty-state"><div class="icon">📦</div><h2>Нет репозиториев</h2><p>Создайте свой первый репозиторий!</p></div>';return}
+            if(repos.length===0){
+                c.innerHTML='<div class="empty-state"><div class="icon">📦</div><h2>Нет репозиториев</h2><p>Создайте свой первый репозиторий!</p><button onclick="showCreateRepo()">+ Создать новый репозиторий</button></div>';
+                return;
+            }
             var h='';
             repos.forEach(function(r){
                 var fc=r.files?r.files.length:0;
@@ -408,4 +412,4 @@
         loadData();showReposList();
     </script>
 </body>
-    </html>
+</html>
