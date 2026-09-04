@@ -21,6 +21,7 @@
         .btn-preview{background:#58a6ff;color:#000}
         .btn-pages{background:#a371f7;color:#fff}
         .btn-create-page{background:#f0883e;color:#fff}
+        .btn-copy{background:#1f6feb;color:#fff}
         .tabs{display:flex;background:#161b22;border-bottom:1px solid #30363d;flex-shrink:0}
         .tab{flex:1;padding:12px;text-align:center;cursor:pointer;font-size:15px;color:#8b949e;border-bottom:2px solid transparent;user-select:none;touch-action:manipulation}
         .tab.active{color:#e6edf3;border-bottom-color:#58a6ff}
@@ -318,6 +319,7 @@
             var h='<div style="margin-bottom:15px;display:flex;gap:10px;flex-wrap:wrap">';
             h+='<button class="btn-secondary" onclick="openRepo('+currentRepo.id+')">← Назад</button>';
             h+='<button onclick="saveFile()">💾 Сохранить</button>';
+            h+='<button class="btn-copy" onclick="copyFileContent()">📋 Копировать код</button>';
             h+='<button class="btn-secondary" onclick="downloadCurrentFile()">⬇ Скачать</button>';
             if(currentFile.name.endsWith('.html')){
                 h+='<button class="btn-preview" onclick="previewFile()">👁 Предпросмотр</button>';
@@ -356,6 +358,52 @@
                 clearTimeout(searchTimer);
                 searchTimer=setTimeout(performSearch,150);
             });
+        }
+
+        function copyFileContent(){
+            var ta=document.getElementById('fileContent');
+            if(!ta)return;
+            
+            // Сохраняем текущее значение в currentFile перед копированием
+            if(currentFile){
+                currentFile.content = ta.value;
+                saveData();
+            }
+            
+            // Копируем текст в буфер обмена
+            if(navigator.clipboard && navigator.clipboard.writeText){
+                navigator.clipboard.writeText(ta.value).then(function(){
+                    showToast('📋 Код скопирован в буфер обмена!');
+                }).catch(function(){
+                    // Fallback для старых браузеров
+                    fallbackCopy(ta.value);
+                });
+            } else {
+                fallbackCopy(ta.value);
+            }
+        }
+
+        function fallbackCopy(text){
+            var tempTextarea = document.createElement('textarea');
+            tempTextarea.value = text;
+            tempTextarea.style.position = 'fixed';
+            tempTextarea.style.opacity = '0';
+            document.body.appendChild(tempTextarea);
+            tempTextarea.select();
+            tempTextarea.setSelectionRange(0, 99999); // Для мобильных устройств
+            
+            try {
+                var successful = document.execCommand('copy');
+                if(successful){
+                    showToast('📋 Код скопирован в буфер обмена!');
+                } else {
+                    showToast('❌ Не удалось скопировать код');
+                }
+            } catch (err) {
+                showToast('❌ Ошибка при копировании: ' + err);
+            }
+            
+            document.body.removeChild(tempTextarea);
         }
 
         function saveFile(){
